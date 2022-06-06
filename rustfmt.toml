@@ -1,0 +1,15 @@
+force_explicit_abi = false
+format_code_in_doc_comments = true
+format_macro_bodies = true
+format_macro_matchers = true
+format_strings = true
+group_imports = "StdExternalCrate"
+imports_granularity = "One"
+match_arm_blocks = false
+match_block_trailing_comma = false
+newline_style = "Unix"
+overflow_delimited_expr = true
+unstable_features = true
+use_field_init_shorthand = true
+use_small_heuristics = "Max"
+wrap_comments = true
