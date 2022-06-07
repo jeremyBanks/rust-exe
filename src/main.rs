@@ -1,12 +1,21 @@
-use {
-    std::time::{SystemTime, UNIX_EPOCH},
+pub(crate) use {
+    crate::{hashing::*, run::*},
     ::{
         eyre::{bail, Result},
-        std::{self, ffi::OsString, os::unix::prelude::OsStrExt, path::PathBuf},
+        heck::*,
+        std::{
+            self,
+            env::current_dir,
+            ffi::OsString,
+            os::unix::prelude::OsStrExt,
+            path::PathBuf,
+            time::{SystemTime, UNIX_EPOCH},
+        },
     },
 };
 
 mod hashing;
+mod run;
 
 pub fn main() -> eyre::Result<()> {
     let mut args = Vec::from_iter(std::env::args_os().skip(1));
@@ -62,41 +71,8 @@ fn run(path: PathBuf, args: &[OsString]) -> Result<()> {
 
 fn eval(body: String, args: &[OsString]) -> Result<()> {
     let body = format!("fn main() {{ println!(\"{{}}\", {{{body}}}); }}");
-    let hash = hashing::git_blob_sha1_hex(body.as_bytes());
-    let path = std::env::current_dir().unwrap().join(format!("eval_{}.rs", &hash[..8]));
+    let hash = git_blob_sha1_hex(body.as_bytes());
+    let path = current_dir().unwrap().join(format!("eval_{}.rs", &hash[..8]));
 
     compile_and_run(path, body, args)
-}
-
-fn compile_and_run(path: PathBuf, body: String, args: &[OsString]) -> Result<()> {
-    let mtime = SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs_f64();
-
-    let hash = hashing::git_blob_sha1_hex(body.as_bytes());
-
-    let filename = path.as_path().file_name().unwrap();
-
-    let identifier =
-        ::heck::AsSnakeCase(path.as_path().file_stem().unwrap().to_string_lossy()).to_string();
-
-    let mut manifest = format!(
-        r#"
-            [package]
-            autobins = false
-            name = {identifier:?}
-            edition = 2021
-            version = "0.0.0-mtime-{mtime:.3}"
-
-            [[bins]]
-            name = {identifier:?}
-            path = {filename:?}
-
-            [dependencies]
-        "#
-    );
-
-    let file = ::syn::parse_file(&body)?;
-
-    println!("{manifest}");
-
-    std::process::exit(42)
 }

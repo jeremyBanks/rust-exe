@@ -49,17 +49,17 @@ fn test_commands() -> Result<()> {
 
     assert_command(Command::new("rust").arg("eval").args(["2 +", "2", "* 3"]), expect![[r#"
         status: error 42
-        stdout: 297 bytes/characters
+        stdout: 292 bytes/characters
         
                             [package]
                             autobins = false
                             name = "eval_6722ac8e"
                             edition = 2021
-                            version = "0.0.0-mtime-1654563716.775"
+                            version = "0.0.0-mtime-1654564350.691"
         
                             [[bins]]
                             name = "eval_6722ac8e"
-                            path = "eval_6722ac8e.rs"
+                            path = "src/main.rs"
         
                             [dependencies]
         stderr: nothing
@@ -69,17 +69,17 @@ fn test_commands() -> Result<()> {
 
     assert_command(Command::new("examples/hello.rs"), expect![[r#"
         status: error 42
-        stdout: 273 bytes/characters
+        stdout: 276 bytes/characters
         
                             [package]
                             autobins = false
                             name = "hello"
                             edition = 2021
-                            version = "0.0.0-mtime-1654563716.779"
+                            version = "0.0.0-mtime-1654564350.694"
         
                             [[bins]]
                             name = "hello"
-                            path = "hello.rs"
+                            path = "src/main.rs"
         
                             [dependencies]
         stderr: nothing
@@ -87,17 +87,17 @@ fn test_commands() -> Result<()> {
 
     assert_command(Command::new("rust").arg("examples/hello.rs"), expect![[r#"
         status: error 42
-        stdout: 273 bytes/characters
+        stdout: 276 bytes/characters
         
                             [package]
                             autobins = false
                             name = "hello"
                             edition = 2021
-                            version = "0.0.0-mtime-1654563716.781"
+                            version = "0.0.0-mtime-1654564350.696"
         
                             [[bins]]
                             name = "hello"
-                            path = "hello.rs"
+                            path = "src/main.rs"
         
                             [dependencies]
         stderr: nothing
@@ -105,17 +105,17 @@ fn test_commands() -> Result<()> {
 
     assert_command(Command::new("rust").args(["run", "examples/hello.rs"]), expect![[r#"
         status: error 42
-        stdout: 273 bytes/characters
+        stdout: 276 bytes/characters
         
                             [package]
                             autobins = false
                             name = "hello"
                             edition = 2021
-                            version = "0.0.0-mtime-1654563716.784"
+                            version = "0.0.0-mtime-1654564350.698"
         
                             [[bins]]
                             name = "hello"
-                            path = "hello.rs"
+                            path = "src/main.rs"
         
                             [dependencies]
         stderr: nothing
@@ -125,17 +125,17 @@ fn test_commands() -> Result<()> {
 
     assert_command(Command::new("examples/args.rs").args(["1", "2.0", "three"]), expect![[r#"
         status: error 42
-        stdout: 270 bytes/characters
+        stdout: 274 bytes/characters
         
                             [package]
                             autobins = false
                             name = "args"
                             edition = 2021
-                            version = "0.0.0-mtime-1654563716.787"
+                            version = "0.0.0-mtime-1654564350.701"
         
                             [[bins]]
                             name = "args"
-                            path = "args.rs"
+                            path = "src/main.rs"
         
                             [dependencies]
         stderr: nothing
@@ -145,17 +145,17 @@ fn test_commands() -> Result<()> {
         Command::new("rust").arg("examples/args.rs").args(["1", "2.0", "three"]),
         expect![[r#"
             status: error 42
-            stdout: 270 bytes/characters
+            stdout: 274 bytes/characters
         
                                 [package]
                                 autobins = false
                                 name = "args"
                                 edition = 2021
-                                version = "0.0.0-mtime-1654563716.789"
+                                version = "0.0.0-mtime-1654564350.703"
         
                                 [[bins]]
                                 name = "args"
-                                path = "args.rs"
+                                path = "src/main.rs"
         
                                 [dependencies]
             stderr: nothing
@@ -166,17 +166,17 @@ fn test_commands() -> Result<()> {
         Command::new("rust").args(["run", "examples/args.rs"]).args(["1", "2.0", "three"]),
         expect![[r#"
             status: error 42
-            stdout: 270 bytes/characters
+            stdout: 274 bytes/characters
         
                                 [package]
                                 autobins = false
                                 name = "args"
                                 edition = 2021
-                                version = "0.0.0-mtime-1654563716.792"
+                                version = "0.0.0-mtime-1654564350.706"
         
                                 [[bins]]
                                 name = "args"
-                                path = "args.rs"
+                                path = "src/main.rs"
         
                                 [dependencies]
             stderr: nothing
