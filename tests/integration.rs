@@ -36,11 +36,23 @@ fn test_commands() -> Result<()> {
     // eval (no main)
 
     assert_command(Command::new("rust").arg("eval").args(["2 +", "2", "* 3"]), expect![[r#"
+    status: success
+    stdout: 2 bytes/characters
+            8
+    stderr: none
+"#]])?;
+
+    assert_command(
+        Command::new("rust").arg("eval").args(["Vec::from_iter", "(std::env::args())"]),
+        expect![[r#"
         status: success
-        stdout: 2 bytes/characters
-                8
+        stdout: 64 bytes/characters
+                [
+                    "~/.rust-exe/bin/eval-b5b43243-b4d08cb3",
+                ]
         stderr: none
-    "#]])?;
+    "#]],
+    )?;
 
     // hello world
 
@@ -77,9 +89,9 @@ fn test_commands() -> Result<()> {
     assert_command(Command::new("examples/args.rs").args(["1", "2.0", "three"]), expect![[r#"
         status: success
         stdout: none
-        stderr: 135 bytes/characters
-                [args.rs:6] working_dir = "rust-exe"
-                [args.rs:6] current_exe = "args-f569275b"
+        stderr: 177 bytes/characters
+                [args.rs:6] working_dir = "/workspaces/rust-exe"
+                [args.rs:6] current_exe = "~/.rust-exe/bin/args-f569275b"
                 [args.rs:6] args = [
                     "1",
                     "2.0",
@@ -93,9 +105,9 @@ fn test_commands() -> Result<()> {
         expect![[r#"
             status: success
             stdout: none
-            stderr: 135 bytes/characters
-                    [args.rs:6] working_dir = "rust-exe"
-                    [args.rs:6] current_exe = "args-f569275b"
+            stderr: 177 bytes/characters
+                    [args.rs:6] working_dir = "/workspaces/rust-exe"
+                    [args.rs:6] current_exe = "~/.rust-exe/bin/args-f569275b"
                     [args.rs:6] args = [
                         "1",
                         "2.0",
@@ -110,9 +122,9 @@ fn test_commands() -> Result<()> {
         expect![[r#"
             status: success
             stdout: none
-            stderr: 135 bytes/characters
-                    [args.rs:6] working_dir = "rust-exe"
-                    [args.rs:6] current_exe = "args-f569275b"
+            stderr: 177 bytes/characters
+                    [args.rs:6] working_dir = "/workspaces/rust-exe"
+                    [args.rs:6] current_exe = "~/.rust-exe/bin/args-f569275b"
                     [args.rs:6] args = [
                         "1",
                         "2.0",
@@ -165,8 +177,7 @@ pub fn assert_command(mut command: impl BorrowMut<Command>, expect: Expect) -> R
         let byte_len = output.stdout.len();
         let stdout = String::from_utf8(output.stdout)?;
         let char_len = stdout.chars().count();
-        let stdout = strip_color(&stdout).replace("\n", "\n        ");
-        let stdout = stdout.trim_end();
+        let stdout = format_output(&stdout);
         if char_len == byte_len {
             format!("{byte_len} bytes/characters\n        {stdout}")
         } else {
@@ -180,8 +191,7 @@ pub fn assert_command(mut command: impl BorrowMut<Command>, expect: Expect) -> R
         let byte_len = output.stderr.len();
         let stderr = String::from_utf8(output.stderr)?;
         let char_len = stderr.chars().count();
-        let stderr = strip_color(&stderr).replace("\n", "\n        ");
-        let stderr = stderr.trim_end();
+        let stderr = format_output(&stderr);
         if char_len == byte_len {
             format!("{byte_len} bytes/characters\n        {stderr}\n")
         } else {
@@ -194,6 +204,13 @@ pub fn assert_command(mut command: impl BorrowMut<Command>, expect: Expect) -> R
     expect.assert_eq(&s);
 
     Ok(())
+}
+
+fn format_output(s: &str) -> String {
+    let s = strip_color(&s).replace("\n", "\n        ");
+    let s = s.trim_end();
+    let s = s.replace(::home::home_dir().unwrap().to_str().unwrap(), "~");
+    s
 }
 
 fn strip_color(s: &str) -> String {
