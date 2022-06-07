@@ -1,9 +1,6 @@
-use {
-    crate::*,
-    ::{
-        sha1::{Digest, Sha1},
-        std::fmt::Write,
-    },
+use ::{
+    sha1::{Digest, Sha1},
+    std::fmt::Write,
 };
 
 pub fn git_blob_sha1_hex(content: &[u8]) -> String {
