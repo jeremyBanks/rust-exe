@@ -13,7 +13,7 @@ fn test_commands() -> Result<()> {
     let env_path = env::var("PATH").unwrap_or_default();
     let env_dir = env::current_dir()?;
     let env_path = env::join_paths(
-        env::split_paths(&env_path).chain(Some(env_dir.join("target").join("debug"))),
+        std::iter::once(env_dir.join("target").join("debug")).chain(env::split_paths(&env_path)),
     )?;
     env::set_var("PATH", env_path);
 
@@ -48,140 +48,97 @@ fn test_commands() -> Result<()> {
     // eval (no main)
 
     assert_command(Command::new("rust").arg("eval").args(["2 +", "2", "* 3"]), expect![[r#"
-        status: error 42
-        stdout: 292 bytes/characters
-        
-                            [package]
-                            autobins = false
-                            name = "eval_6722ac8e"
-                            edition = 2021
-                            version = "0.0.0-mtime-1654564350.691"
-        
-                            [[bins]]
-                            name = "eval_6722ac8e"
-                            path = "src/main.rs"
-        
-                            [dependencies]
+        status: success
+        stdout: 2 bytes/characters
+                8
         stderr: nothing
     "#]])?;
 
     // hello world
 
     assert_command(Command::new("examples/hello.rs"), expect![[r#"
-        status: error 42
-        stdout: 276 bytes/characters
-        
-                            [package]
-                            autobins = false
-                            name = "hello"
-                            edition = 2021
-                            version = "0.0.0-mtime-1654564350.694"
-        
-                            [[bins]]
-                            name = "hello"
-                            path = "src/main.rs"
-        
-                            [dependencies]
+        status: success
+        stdout: 12 bytes/characters
+                hello, rust
         stderr: nothing
     "#]])?;
 
     assert_command(Command::new("rust").arg("examples/hello.rs"), expect![[r#"
-        status: error 42
-        stdout: 276 bytes/characters
-        
-                            [package]
-                            autobins = false
-                            name = "hello"
-                            edition = 2021
-                            version = "0.0.0-mtime-1654564350.696"
-        
-                            [[bins]]
-                            name = "hello"
-                            path = "src/main.rs"
-        
-                            [dependencies]
+        status: success
+        stdout: 12 bytes/characters
+                hello, rust
         stderr: nothing
     "#]])?;
 
     assert_command(Command::new("rust").args(["run", "examples/hello.rs"]), expect![[r#"
-        status: error 42
-        stdout: 276 bytes/characters
-        
-                            [package]
-                            autobins = false
-                            name = "hello"
-                            edition = 2021
-                            version = "0.0.0-mtime-1654564350.698"
-        
-                            [[bins]]
-                            name = "hello"
-                            path = "src/main.rs"
-        
-                            [dependencies]
+        status: success
+        stdout: 12 bytes/characters
+                hello, rust
         stderr: nothing
     "#]])?;
 
     // arguments
 
     assert_command(Command::new("examples/args.rs").args(["1", "2.0", "three"]), expect![[r#"
-        status: error 42
-        stdout: 274 bytes/characters
-        
-                            [package]
-                            autobins = false
-                            name = "args"
-                            edition = 2021
-                            version = "0.0.0-mtime-1654564350.701"
-        
-                            [[bins]]
-                            name = "args"
-                            path = "src/main.rs"
-        
-                            [dependencies]
-        stderr: nothing
+        status: success
+        stdout: nothing
+        stderr: 85 bytes/characters
+                [src/main.rs:4] args = [
+                    "target/debug/args",
+                    "1",
+                    "2.0",
+                    "three",
+                ]
+
     "#]])?;
 
     assert_command(
         Command::new("rust").arg("examples/args.rs").args(["1", "2.0", "three"]),
         expect![[r#"
-            status: error 42
-            stdout: 274 bytes/characters
-        
-                                [package]
-                                autobins = false
-                                name = "args"
-                                edition = 2021
-                                version = "0.0.0-mtime-1654564350.703"
-        
-                                [[bins]]
-                                name = "args"
-                                path = "src/main.rs"
-        
-                                [dependencies]
-            stderr: nothing
+            status: success
+            stdout: nothing
+            stderr: 85 bytes/characters
+                    [src/main.rs:4] args = [
+                        "target/debug/args",
+                        "1",
+                        "2.0",
+                        "three",
+                    ]
+
         "#]],
     )?;
 
     assert_command(
         Command::new("rust").args(["run", "examples/args.rs"]).args(["1", "2.0", "three"]),
         expect![[r#"
-            status: error 42
-            stdout: 274 bytes/characters
-        
-                                [package]
-                                autobins = false
-                                name = "args"
-                                edition = 2021
-                                version = "0.0.0-mtime-1654564350.706"
-        
-                                [[bins]]
-                                name = "args"
-                                path = "src/main.rs"
-        
-                                [dependencies]
-            stderr: nothing
+            status: success
+            stdout: nothing
+            stderr: 85 bytes/characters
+                    [src/main.rs:4] args = [
+                        "target/debug/args",
+                        "1",
+                        "2.0",
+                        "three",
+                    ]
+
         "#]],
     )?;
+
+    // inferred dependencies
+
+    assert_command(Command::new("examples/EyRe.rs").args(["1", "2.0", "3"]), expect![[r#"
+        status: success
+        stdout: 16 bytes/characters
+                [1.0, 2.0, 3.0]
+        stderr: nothing
+    "#]])?;
+
+    assert_command(Command::new("examples/once_cell.rs"), expect![[r#"
+        status: success
+        stdout: 12 bytes/characters
+                hello, rust
+        stderr: nothing
+    "#]])?;
 
     Ok(())
 }
