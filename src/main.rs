@@ -70,7 +70,7 @@ fn run(path: PathBuf, args: &[OsString]) -> Result<()> {
 }
 
 fn eval(body: String, args: &[OsString]) -> Result<()> {
-    let body = format!("fn main() {{ println!(\"{{}}\", {{{body}}}); }}");
+    let body = format!("fn main() {{ println!(\"{{:?}}\", {{{body}}}); }}");
     let hash = git_blob_sha1_hex(body.as_bytes());
     let path = current_dir().unwrap().join(format!("eval_{}.rs", &hash[..8]));
 
