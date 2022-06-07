@@ -1,8 +1,12 @@
+#[allow(unused)]
 pub(crate) use {
     crate::{hashing::*, run::*},
     ::{
+        cargo_lock::Lockfile,
         eyre::Result,
         heck::*,
+        quote::quote,
+        serde_json::{json, Value as Json},
         std::{
             self,
             env::current_dir,
@@ -11,13 +15,15 @@ pub(crate) use {
             path::PathBuf,
             time::{SystemTime, UNIX_EPOCH},
         },
+        syn,
+        toml_edit::easy::{toml, Value as Toml},
     },
 };
 
 mod hashing;
 mod run;
 
-pub fn main() -> eyre::Result<()> {
+fn main() -> eyre::Result<()> {
     color_eyre::install()?;
     env_logger::try_init()?;
 

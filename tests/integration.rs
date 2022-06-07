@@ -44,6 +44,13 @@ fn test_commands() -> Result<()> {
 
     // hello world
 
+    assert_command(Command::new("examples/hello"), expect![[r#"
+        status: success
+        stdout: 12 bytes/characters
+                hello, rust
+        stderr: none
+    "#]])?;
+
     assert_command(Command::new("examples/hello.rs"), expect![[r#"
         status: success
         stdout: 12 bytes/characters
@@ -128,6 +135,13 @@ fn test_commands() -> Result<()> {
         status: success
         stdout: 12 bytes/characters
                 hello, rust
+        stderr: none
+    "#]])?;
+
+    assert_command(Command::new("examples/many.rs"), expect![[r#"
+        status: success
+        stdout: 62 bytes/characters
+                D Ghhd Cdz Ig9u Zs Bzb W Fsb C Bzd G Vw Ig Zvci Bb Yv0gb W Fu
         stderr: none
     "#]])?;
 

@@ -26,7 +26,7 @@ pub fn compile_and_run(path: PathBuf, body: String, args: &[OsString]) -> Result
     let kebab = name.to_kebab_case();
     let filename = format!("{snake}.rs");
 
-    let version = format!("0.0.0-exe-{hash8}");
+    let version = format!("0.0.0-{hash8}");
 
     let crate_name = format!("{kebab}-{path8}");
     let crate_path = src_dir.join(&crate_name);
@@ -34,12 +34,11 @@ pub fn compile_and_run(path: PathBuf, body: String, args: &[OsString]) -> Result
     fs::remove_dir_all(&crate_path).ok();
     fs::create_dir_all(&crate_path).unwrap();
 
-    let mut manifest = ::toml::toml! {
+    let mut manifest = toml! {
         [package]
         autobins = false
         edition = "2021"
         name = (crate_name.clone())
-        publish = false
         version = version
 
         [[bin]]
@@ -49,7 +48,7 @@ pub fn compile_and_run(path: PathBuf, body: String, args: &[OsString]) -> Result
         [dependencies]
     };
 
-    let file = ::syn::parse_file(&body)?;
+    let file = syn::parse_file(&body)?;
     let mut crate_doc = String::new();
 
     for attr in file.attrs.iter() {
@@ -130,12 +129,9 @@ pub fn compile_and_run(path: PathBuf, body: String, args: &[OsString]) -> Result
             continue;
         }
 
-        manifest["dependencies"].as_table_mut().unwrap().insert(
-            root_crate.clone(),
-            ::toml::toml! {
-                version = "*"
-            },
-        );
+        manifest["dependencies"].as_table_mut().unwrap().insert(root_crate.clone(), toml! {
+            version = "*"
+        });
     }
 
     let manifest_path = crate_path.join("Cargo.toml");
@@ -148,6 +144,15 @@ pub fn compile_and_run(path: PathBuf, body: String, args: &[OsString]) -> Result
         .arg(&tmp_dir)
         .current_dir(&crate_path)
         .status()?;
+
+    let lockfile = Lockfile::load(crate_path.join("Cargo.lock")).unwrap();
+    let package_lock =
+        &lockfile.packages.iter().filter(|p| p.name.as_str() == crate_name).next().unwrap();
+    let _dependencies = &package_lock
+        .dependencies
+        .iter()
+        .map(|d| format!("{} {}", d.name, d.version))
+        .collect::<Vec<_>>();
 
     std::fs::copy(tmp_dir.join("debug").join(&crate_name), bin_dir.join(&crate_name))?;
 
