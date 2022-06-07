@@ -70,10 +70,10 @@ fn test_commands() -> Result<()> {
     assert_command(Command::new("examples/args.rs").args(["1", "2.0", "three"]), expect![[r#"
         status: success
         stdout: none
-        stderr: 189 bytes/characters
-                [exe/args-f569275b/args.rs:6] working_dir = "rust-exe"
-                [exe/args-f569275b/args.rs:6] current_exe = "args-f569275b"
-                [exe/args-f569275b/args.rs:6] args = [
+        stderr: 135 bytes/characters
+                [args.rs:6] working_dir = "rust-exe"
+                [args.rs:6] current_exe = "args-f569275b"
+                [args.rs:6] args = [
                     "1",
                     "2.0",
                     "three",
@@ -86,10 +86,10 @@ fn test_commands() -> Result<()> {
         expect![[r#"
             status: success
             stdout: none
-            stderr: 189 bytes/characters
-                    [exe/args-f569275b/args.rs:6] working_dir = "rust-exe"
-                    [exe/args-f569275b/args.rs:6] current_exe = "args-f569275b"
-                    [exe/args-f569275b/args.rs:6] args = [
+            stderr: 135 bytes/characters
+                    [args.rs:6] working_dir = "rust-exe"
+                    [args.rs:6] current_exe = "args-f569275b"
+                    [args.rs:6] args = [
                         "1",
                         "2.0",
                         "three",
@@ -103,10 +103,10 @@ fn test_commands() -> Result<()> {
         expect![[r#"
             status: success
             stdout: none
-            stderr: 189 bytes/characters
-                    [exe/args-f569275b/args.rs:6] working_dir = "rust-exe"
-                    [exe/args-f569275b/args.rs:6] current_exe = "args-f569275b"
-                    [exe/args-f569275b/args.rs:6] args = [
+            stderr: 135 bytes/characters
+                    [args.rs:6] working_dir = "rust-exe"
+                    [args.rs:6] current_exe = "args-f569275b"
+                    [args.rs:6] args = [
                         "1",
                         "2.0",
                         "three",
@@ -199,13 +199,16 @@ fn ensure_rust_bin_in_path() {
         let mut env_path = env::var("PATH").unwrap_or_default();
         let env_dir = env::current_dir().unwrap();
         let debug_dir = env_dir.join("target").join("debug");
+        let examples_dir = env_dir.join("examples");
         if !env_path.contains(&debug_dir.to_str().unwrap()) {
-            env_path = env::join_paths(once(debug_dir).chain(env::split_paths(&env_path)))
-                .unwrap()
-                .to_str()
-                .unwrap()
-                .to_string();
+            env_path = env::join_paths(
+                [debug_dir, examples_dir].into_iter().chain(env::split_paths(&env_path)),
+            )
+            .unwrap()
+            .to_str()
+            .unwrap()
+            .to_string();
+            env::set_var("PATH", env_path);
         }
-        env::set_var("PATH", env_path);
     });
 }

@@ -1,10 +1,18 @@
 use {
     crate::*,
-    ::once_cell::sync::Lazy,
     ::std::{fs, process::Command},
 };
 
 pub fn compile_and_run(path: PathBuf, body: String, args: &[OsString]) -> Result<()> {
+    let data_dir = ::home::home_dir().unwrap_or_default().join(".rust-exe");
+    let src_dir = data_dir.join("src");
+    let tmp_dir = data_dir.join("tmp");
+    let bin_dir = data_dir.join("bin");
+
+    fs::create_dir_all(&src_dir).unwrap();
+    fs::create_dir_all(&tmp_dir).unwrap();
+    fs::create_dir_all(&bin_dir).unwrap();
+
     let _mtime = SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs_f64();
 
     let hash = hashing::git_blob_sha1_hex(body.as_bytes());
@@ -16,31 +24,30 @@ pub fn compile_and_run(path: PathBuf, body: String, args: &[OsString]) -> Result
     let name = path.as_path().file_stem().unwrap().to_string_lossy();
     let snake = name.to_snake_case();
     let kebab = name.to_kebab_case();
+    let filename = format!("{snake}.rs");
 
     let version = format!("0.0.0-exe-{hash8}");
 
     let crate_name = format!("{kebab}-{path8}");
-    let crate_path = WORKSPACE_PATH.join("exe").join(&crate_name);
+    let crate_path = src_dir.join(&crate_name);
 
     fs::remove_dir_all(&crate_path).ok();
     fs::create_dir_all(&crate_path).unwrap();
 
-    let mut manifest = format!(
-        r#"
-            [package]
-            autobins = false
-            edition = "2021"
-            name = "{crate_name}"
-            publish = false
-            version = {version:?}
+    let mut manifest = ::toml::toml! {
+        [package]
+        autobins = false
+        edition = "2021"
+        name = (crate_name.clone())
+        publish = false
+        version = version
 
-            [[bin]]
-            name = "{crate_name}"
-            path = "{snake}.rs"
+        [[bin]]
+        name = (crate_name.clone())
+        path = (filename.clone())
 
-            [dependencies]
-        "#
-    );
+        [dependencies]
+    };
 
     let file = ::syn::parse_file(&body)?;
     let mut crate_doc = String::new();
@@ -123,39 +130,31 @@ pub fn compile_and_run(path: PathBuf, body: String, args: &[OsString]) -> Result
             continue;
         }
 
-        manifest.push_str(&format!("{root_crate} = \"*\"\n"));
+        manifest["dependencies"].as_table_mut().unwrap().insert(
+            root_crate.clone(),
+            ::toml::toml! {
+                version = "*"
+            },
+        );
     }
 
     let manifest_path = crate_path.join("Cargo.toml");
-    std::fs::write(&manifest_path, manifest)?;
-    let main_path = crate_path.join(format!("{snake}.rs"));
+    std::fs::write(&manifest_path, manifest.to_string())?;
+    let main_path = crate_path.join(filename);
     std::fs::write(main_path, body)?;
 
-    Command::new("cargo").args(&["build", "--quiet"]).current_dir(&crate_path).status()?;
+    Command::new("cargo")
+        .args(&["build", "--quiet", "--target-dir"])
+        .arg(&tmp_dir)
+        .current_dir(&crate_path)
+        .status()?;
 
-    std::process::exit(
-        Command::new(WORKSPACE_PATH.join("target").join("debug").join(crate_name))
-            .args(args)
-            .status()?
-            .code()
-            .unwrap_or(0xFF),
-    )
+    std::fs::copy(tmp_dir.join("debug").join(&crate_name), bin_dir.join(&crate_name))?;
+
+    let status =
+        Command::new(bin_dir.join(&crate_name)).args(args).status()?.code().unwrap_or(0xFF);
+
+    Command::new("find").arg(data_dir).args(["-amin", "+360", "-delete"]).status()?;
+
+    std::process::exit(status);
 }
-
-static WORKSPACE_PATH: Lazy<PathBuf> = Lazy::new(|| {
-    let workspace_dir = ::home::home_dir().unwrap_or_default().join(".rust-exe").join("workspace");
-    let workspace_manifest = workspace_dir.join("Cargo.toml");
-    if !workspace_manifest.exists() {
-        fs::remove_dir_all(&workspace_dir).ok();
-        fs::create_dir_all(&workspace_dir).unwrap();
-        fs::write(
-            &workspace_manifest,
-            r#"
-            [workspace]
-            members = ["exe/*"]
-        "#,
-        )
-        .unwrap();
-    }
-    workspace_dir
-});
