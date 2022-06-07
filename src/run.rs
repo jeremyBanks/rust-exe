@@ -1,26 +1,42 @@
-use {crate::*, ::std::process::Command};
+use {
+    crate::*,
+    ::once_cell::sync::Lazy,
+    ::std::{fs, process::Command},
+};
 
 pub fn compile_and_run(path: PathBuf, body: String, args: &[OsString]) -> Result<()> {
-    let mtime = SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs_f64();
+    let _mtime = SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs_f64();
 
     let hash = hashing::git_blob_sha1_hex(body.as_bytes());
     let hash8 = &hash[..8];
 
-    let identifier = path.as_path().file_stem().unwrap().to_string_lossy().to_snake_case();
-    let kebab = identifier.to_kebab_case();
+    let path_hash = hashing::git_blob_sha1_hex(path.as_os_str().as_bytes());
+    let path8 = &path_hash[..8];
+
+    let name = path.as_path().file_stem().unwrap().to_string_lossy();
+    let snake = name.to_snake_case();
+    let kebab = name.to_kebab_case();
+
+    let version = format!("0.0.0-exe-{hash8}");
+
+    let crate_name = format!("{kebab}-{path8}");
+    let crate_path = WORKSPACE_PATH.join("exe").join(&crate_name);
+
+    fs::remove_dir_all(&crate_path).ok();
+    fs::create_dir_all(&crate_path).unwrap();
 
     let mut manifest = format!(
         r#"
             [package]
             autobins = false
             edition = "2021"
-            name = "{kebab}-{hash8}"
+            name = "{crate_name}"
             publish = false
-            version = "0.0.0"
+            version = {version:?}
 
             [[bin]]
-            name = {identifier:?}
-            path = "src/main.rs"
+            name = "{crate_name}"
+            path = "{snake}.rs"
 
             [dependencies]
         "#
@@ -77,7 +93,7 @@ pub fn compile_and_run(path: PathBuf, body: String, args: &[OsString]) -> Result
                 } else {
                     match &item_use.tree {
                         syn::UseTree::Group(group) => {
-                            for tree in group.items.iter() {
+                            for _tree in group.items.iter() {
                                 // we need to support cases like
                                 // use {{{::{{{{crossterm::style::
                                 // {{{{Stylize}}}}}}}}}}};
@@ -110,21 +126,36 @@ pub fn compile_and_run(path: PathBuf, body: String, args: &[OsString]) -> Result
         manifest.push_str(&format!("{root_crate} = \"*\"\n"));
     }
 
-    let dir = tempfile::TempDir::new()?;
-    let manifest_path = dir.path().join("Cargo.toml");
+    let manifest_path = crate_path.join("Cargo.toml");
     std::fs::write(&manifest_path, manifest)?;
-    let main_path = dir.path().join("src/main.rs");
-    std::fs::create_dir_all(main_path.parent().unwrap())?;
+    let main_path = crate_path.join(format!("{snake}.rs"));
     std::fs::write(main_path, body)?;
 
-    Command::new("cargo").args(&["build", "--quiet"]).current_dir(dir.path()).status()?;
+    Command::new("cargo").args(&["build", "--quiet"]).current_dir(&crate_path).status()?;
 
     std::process::exit(
-        Command::new(format!("target/debug/{identifier}"))
+        Command::new(WORKSPACE_PATH.join("target").join("debug").join(crate_name))
             .args(args)
-            .current_dir(dir.path())
             .status()?
             .code()
             .unwrap_or(0xFF),
     )
 }
+
+static WORKSPACE_PATH: Lazy<PathBuf> = Lazy::new(|| {
+    let workspace_dir = ::home::home_dir().unwrap_or_default().join(".rust-exe").join("workspace");
+    let workspace_manifest = workspace_dir.join("Cargo.toml");
+    if !workspace_manifest.exists() {
+        fs::remove_dir_all(&workspace_dir).ok();
+        fs::create_dir_all(&workspace_dir).unwrap();
+        fs::write(
+            &workspace_manifest,
+            r#"
+            [workspace]
+            members = ["exe/*"]
+        "#,
+        )
+        .unwrap();
+    }
+    workspace_dir
+});

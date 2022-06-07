@@ -1,48 +1,36 @@
-use {
-    std::{borrow::BorrowMut, ffi::OsString},
-    ::{
-        expect_test::{expect, Expect},
-        eyre::Result,
-        std::{env, fs, path::PathBuf, process::Command},
-    },
+use ::{
+    expect_test::{expect, Expect},
+    eyre::Result,
+    once_cell::sync::{Lazy, OnceCell},
+    regex::Regex,
+    std::{borrow::BorrowMut, env, ffi::OsString, fs, iter::once, path::PathBuf, process::Command},
 };
 
 #[test]
 fn test_commands() -> Result<()> {
-    assert_eq!(Command::new("cargo").args(["build"]).status()?.code(), Some(0));
-    let env_path = env::var("PATH").unwrap_or_default();
-    let env_dir = env::current_dir()?;
-    let env_path = env::join_paths(
-        std::iter::once(env_dir.join("target").join("debug")).chain(env::split_paths(&env_path)),
-    )?;
-    env::set_var("PATH", env_path);
-
     // usage
 
     assert_command(Command::new("rust"), expect![[r#"
         status: success
-        stdout: 290 bytes/characters
-                USAGE:
-                  rust [--GLOBAL_OPTIONS ...] [COMMAND] [--COMMAND_OPTIONS...] TARGET [TARGET_ARGS...]
-        
-                COMMANDS:
-                  rust help                    Prints help information
-                  rust run TARGET [ARGS ...]   Runs a Rust file
-                  rust eval EXPRESSION [...]   Evaluates a Rust expression and prints the result
-        stderr: nothing
+        stdout: 20 bytes/characters
+                #!/usr/bin/env rust
+        stderr: none
     "#]])?;
 
     assert_command(Command::new("rust").arg("help"), expect![[r#"
         status: success
-        stdout: 290 bytes/characters
-                USAGE:
-                  rust [--GLOBAL_OPTIONS ...] [COMMAND] [--COMMAND_OPTIONS...] TARGET [TARGET_ARGS...]
-        
-                COMMANDS:
-                  rust help                    Prints help information
-                  rust run TARGET [ARGS ...]   Runs a Rust file
-                  rust eval EXPRESSION [...]   Evaluates a Rust expression and prints the result
-        stderr: nothing
+        stdout: 20 bytes/characters
+                #!/usr/bin/env rust
+        stderr: none
+    "#]])?;
+
+    assert_command(Command::new("rust").arg("encrypt"), expect![[r#"
+        status: success
+        stdout: 20 bytes/characters
+                #!/usr/bin/env rust
+        stderr: 27 bytes/characters
+                no such command: "encrypt"
+
     "#]])?;
 
     // eval (no main)
@@ -51,7 +39,7 @@ fn test_commands() -> Result<()> {
         status: success
         stdout: 2 bytes/characters
                 8
-        stderr: nothing
+        stderr: none
     "#]])?;
 
     // hello world
@@ -60,31 +48,32 @@ fn test_commands() -> Result<()> {
         status: success
         stdout: 12 bytes/characters
                 hello, rust
-        stderr: nothing
+        stderr: none
     "#]])?;
 
     assert_command(Command::new("rust").arg("examples/hello.rs"), expect![[r#"
         status: success
         stdout: 12 bytes/characters
                 hello, rust
-        stderr: nothing
+        stderr: none
     "#]])?;
 
     assert_command(Command::new("rust").args(["run", "examples/hello.rs"]), expect![[r#"
         status: success
         stdout: 12 bytes/characters
                 hello, rust
-        stderr: nothing
+        stderr: none
     "#]])?;
 
     // arguments
 
     assert_command(Command::new("examples/args.rs").args(["1", "2.0", "three"]), expect![[r#"
         status: success
-        stdout: nothing
-        stderr: 85 bytes/characters
-                [src/main.rs:4] args = [
-                    "target/debug/args",
+        stdout: none
+        stderr: 189 bytes/characters
+                [exe/args-f569275b/args.rs:6] working_dir = "rust-exe"
+                [exe/args-f569275b/args.rs:6] current_exe = "args-f569275b"
+                [exe/args-f569275b/args.rs:6] args = [
                     "1",
                     "2.0",
                     "three",
@@ -96,10 +85,11 @@ fn test_commands() -> Result<()> {
         Command::new("rust").arg("examples/args.rs").args(["1", "2.0", "three"]),
         expect![[r#"
             status: success
-            stdout: nothing
-            stderr: 85 bytes/characters
-                    [src/main.rs:4] args = [
-                        "target/debug/args",
+            stdout: none
+            stderr: 189 bytes/characters
+                    [exe/args-f569275b/args.rs:6] working_dir = "rust-exe"
+                    [exe/args-f569275b/args.rs:6] current_exe = "args-f569275b"
+                    [exe/args-f569275b/args.rs:6] args = [
                         "1",
                         "2.0",
                         "three",
@@ -112,10 +102,11 @@ fn test_commands() -> Result<()> {
         Command::new("rust").args(["run", "examples/args.rs"]).args(["1", "2.0", "three"]),
         expect![[r#"
             status: success
-            stdout: nothing
-            stderr: 85 bytes/characters
-                    [src/main.rs:4] args = [
-                        "target/debug/args",
+            stdout: none
+            stderr: 189 bytes/characters
+                    [exe/args-f569275b/args.rs:6] working_dir = "rust-exe"
+                    [exe/args-f569275b/args.rs:6] current_exe = "args-f569275b"
+                    [exe/args-f569275b/args.rs:6] args = [
                         "1",
                         "2.0",
                         "three",
@@ -130,20 +121,22 @@ fn test_commands() -> Result<()> {
         status: success
         stdout: 16 bytes/characters
                 [1.0, 2.0, 3.0]
-        stderr: nothing
+        stderr: none
     "#]])?;
 
     assert_command(Command::new("examples/once_cell.rs"), expect![[r#"
         status: success
         stdout: 12 bytes/characters
                 hello, rust
-        stderr: nothing
+        stderr: none
     "#]])?;
 
     Ok(())
 }
 
-fn assert_command(mut command: impl BorrowMut<Command>, expect: Expect) -> Result<()> {
+pub fn assert_command(mut command: impl BorrowMut<Command>, expect: Expect) -> Result<()> {
+    ensure_rust_bin_in_path();
+
     let output = command.borrow_mut().output()?;
 
     let status = output
@@ -153,12 +146,12 @@ fn assert_command(mut command: impl BorrowMut<Command>, expect: Expect) -> Resul
         .unwrap_or("signal".to_string());
 
     let stdout = if output.stdout.is_empty() {
-        format!("nothing")
+        format!("none")
     } else {
         let byte_len = output.stdout.len();
         let stdout = String::from_utf8(output.stdout)?;
         let char_len = stdout.chars().count();
-        let stdout = stdout.replace("\n", "\n        ");
+        let stdout = strip_color(&stdout).replace("\n", "\n        ");
         let stdout = stdout.trim_end();
         if char_len == byte_len {
             format!("{byte_len} bytes/characters\n        {stdout}")
@@ -168,12 +161,12 @@ fn assert_command(mut command: impl BorrowMut<Command>, expect: Expect) -> Resul
     };
 
     let stderr = if output.stderr.is_empty() {
-        format!("nothing")
+        format!("none")
     } else {
         let byte_len = output.stderr.len();
         let stderr = String::from_utf8(output.stderr)?;
         let char_len = stderr.chars().count();
-        let stderr = stderr.replace("\n", "\n        ");
+        let stderr = strip_color(&stderr).replace("\n", "\n        ");
         let stderr = stderr.trim_end();
         if char_len == byte_len {
             format!("{byte_len} bytes/characters\n        {stderr}\n")
@@ -187,4 +180,32 @@ fn assert_command(mut command: impl BorrowMut<Command>, expect: Expect) -> Resul
     expect.assert_eq(&s);
 
     Ok(())
+}
+
+fn strip_color(s: &str) -> String {
+    static ANSI_ESCAPE: Lazy<Regex> = Lazy::new(|| {
+        // per https://stackoverflow.com/a/29497680/1114
+        Regex::new(r"[\u001b\u009b][\[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]")
+            .unwrap()
+    });
+    ANSI_ESCAPE.replace_all(s, "").to_string()
+}
+
+fn ensure_rust_bin_in_path() {
+    static DONE: OnceCell<()> = OnceCell::new();
+    DONE.get_or_init(|| {
+        assert_eq!(Command::new("cargo").args(["build"]).status().unwrap().code(), Some(0));
+
+        let mut env_path = env::var("PATH").unwrap_or_default();
+        let env_dir = env::current_dir().unwrap();
+        let debug_dir = env_dir.join("target").join("debug");
+        if !env_path.contains(&debug_dir.to_str().unwrap()) {
+            env_path = env::join_paths(once(debug_dir).chain(env::split_paths(&env_path)))
+                .unwrap()
+                .to_str()
+                .unwrap()
+                .to_string();
+        }
+        env::set_var("PATH", env_path);
+    });
 }
