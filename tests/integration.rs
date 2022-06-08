@@ -90,7 +90,7 @@ fn test_commands() -> Result<()> {
         status: success
         stdout: none
         stderr: 177 bytes/characters
-                [args.rs:6] working_dir = "/workspaces/rust-exe"
+                [args.rs:6] working_dir = "."
                 [args.rs:6] current_exe = "~/.rust-exe/bin/args-f569275b"
                 [args.rs:6] args = [
                     "1",
@@ -106,7 +106,7 @@ fn test_commands() -> Result<()> {
             status: success
             stdout: none
             stderr: 177 bytes/characters
-                    [args.rs:6] working_dir = "/workspaces/rust-exe"
+                    [args.rs:6] working_dir = "."
                     [args.rs:6] current_exe = "~/.rust-exe/bin/args-f569275b"
                     [args.rs:6] args = [
                         "1",
@@ -123,7 +123,7 @@ fn test_commands() -> Result<()> {
             status: success
             stdout: none
             stderr: 177 bytes/characters
-                    [args.rs:6] working_dir = "/workspaces/rust-exe"
+                    [args.rs:6] working_dir = "."
                     [args.rs:6] current_exe = "~/.rust-exe/bin/args-f569275b"
                     [args.rs:6] args = [
                         "1",
@@ -210,6 +210,7 @@ fn format_output(s: &str) -> String {
     let s = strip_color(s).replace('\n', "\n        ");
     let s = s.trim_end();
     let s = s.replace(::home::home_dir().unwrap().to_str().unwrap(), "~");
+    let s = s.replace(env::current_dir().unwrap().to_str().unwrap(), ".");
     s
 }
 

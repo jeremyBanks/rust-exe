@@ -140,6 +140,7 @@ pub fn compile_and_run(path: PathBuf, body: String, args: &[OsString]) -> Result
                                 // {{{{Stylize}}}}}}}}}}};
                             }
                         }
+                        syn::UseTree::Name(_) => {}
                         _ => {}
                     }
                 }
