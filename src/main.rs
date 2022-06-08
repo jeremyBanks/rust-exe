@@ -60,7 +60,7 @@ fn is_path_like(s: impl AsRef<[u8]>) -> bool {
             return true;
         }
     }
-    return false;
+    false
 }
 
 fn help() -> Result<()> {

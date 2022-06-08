@@ -3,7 +3,7 @@ use ::{
     eyre::Result,
     once_cell::sync::{Lazy, OnceCell},
     regex::Regex,
-    std::{borrow::BorrowMut, env, ffi::OsString, fs, iter::once, path::PathBuf, process::Command},
+    std::{borrow::BorrowMut, env, process::Command},
 };
 
 #[test]
@@ -172,7 +172,7 @@ pub fn assert_command(mut command: impl BorrowMut<Command>, expect: Expect) -> R
         .unwrap_or("signal".to_string());
 
     let stdout = if output.stdout.is_empty() {
-        format!("none")
+        "none".to_string()
     } else {
         let byte_len = output.stdout.len();
         let stdout = String::from_utf8(output.stdout)?;
@@ -186,7 +186,7 @@ pub fn assert_command(mut command: impl BorrowMut<Command>, expect: Expect) -> R
     };
 
     let stderr = if output.stderr.is_empty() {
-        format!("none")
+        "none".to_string()
     } else {
         let byte_len = output.stderr.len();
         let stderr = String::from_utf8(output.stderr)?;
@@ -207,7 +207,7 @@ pub fn assert_command(mut command: impl BorrowMut<Command>, expect: Expect) -> R
 }
 
 fn format_output(s: &str) -> String {
-    let s = strip_color(&s).replace("\n", "\n        ");
+    let s = strip_color(s).replace('\n', "\n        ");
     let s = s.trim_end();
     let s = s.replace(::home::home_dir().unwrap().to_str().unwrap(), "~");
     s

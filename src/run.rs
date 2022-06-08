@@ -102,7 +102,7 @@ pub fn compile_and_run(path: PathBuf, body: String, args: &[OsString]) -> Result
             fn visit_path(&mut self, path: &'ast syn::Path) {
                 if path.leading_colon.is_some() {
                     let root_crate = path.segments.first().unwrap().ident.to_string();
-                    self.root_crates.insert(root_crate.clone());
+                    self.root_crates.insert(root_crate);
                 }
                 syn::visit::visit_path(self, path);
             }
@@ -181,8 +181,7 @@ pub fn compile_and_run(path: PathBuf, body: String, args: &[OsString]) -> Result
         .status()?;
 
     let lockfile = Lockfile::load(crate_path.join("Cargo.lock")).unwrap();
-    let package_lock =
-        &lockfile.packages.iter().filter(|p| p.name.as_str() == crate_name).next().unwrap();
+    let package_lock = &lockfile.packages.iter().find(|p| p.name.as_str() == crate_name).unwrap();
     let _dependencies = &package_lock
         .dependencies
         .iter()
