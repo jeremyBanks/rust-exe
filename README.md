@@ -1,6 +1,20 @@
-# rust-exe: the ultimate Rust script runner
+# rust-exe: a Rust script runner
 
-It's the best!
+not complete
+
+## Tasks:
+
+- [ ] fix current tests
+- [ ] run tests on CI
+- [ ] keep trunk green
+  - [ ] use bors-ns to merge
+- [ ] collecting multiple files/modules
+- [ ] use cached binary if (actual) file modification time is recent enough.
+- [ ] reading timestamp annotations from file
+- [ ] writing timestamp annotation on file
+- [ ] reading annotations on top-level items
+- [ ] writing annotations with top-level use statements
+- [ ] check modification times in Git (if unmodified)
 
 ## Features:
 
@@ -17,16 +31,17 @@ It's the best!
 - Multi-file scripts supported (i.e. `mod` statements work).
 - Succinct syntax for explicit dependency version and feature specification.
   ```rust
-  /// [@] "~1.0.0" (-default +derive)
+  ///[#!serde]: 0.1.0 (-default +std)
+  ///[#!serde]: using ({ version = "1.2.4", path = "foo/bar" })
   use ::serde;
   ```
 - Succinct syntax for explicitly specifying toolchain.
   ```rust
-  //! [@] nightly
+  //![#!rust]: nightly
   ```
   ...or freezing the timestamp...
   ```rust
-  //! [@] 1654641060.136
+  //![#!date]: ~2022-12-09-16:09:53
   ```
 - `--lock` flag to generate an associated `.lock` file, and `--locked` to
   require it.
@@ -36,7 +51,9 @@ It's the best!
     other.
 - Or you can embed a full manifest in your crate docs, if you really want to do
   that.
-- WASI support, FWIW.
+- WASI support, FWIW. For sandboxing.
+- If path dependencies are .rs files instead of directories with Cargo.toml,
+  apply everything recursively? That might be a lot easier than managing a workspace.
 
 ## Installation
 
