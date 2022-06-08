@@ -1,3 +1,13 @@
+#!/usr/bin/env rust
+//! [#!]: time "2020-12-09 16:09:53"
+//! [#!]: rust "1.59.0"
+//! [#!]: args "--wasi"
+
+/// [#!]: with "~0.1.0 -default +std"
+pub mod foo {}
+
+/// [#!]: with ({ version = "~0.1.0", no-default-features = true })
+use ::syn;
 use {
     crate::*,
     ::std::{fs, process::Command},

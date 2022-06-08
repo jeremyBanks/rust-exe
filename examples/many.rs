@@ -1,4 +1,6 @@
 #!/usr/bin/env rust
+use ::base64;
+
 fn main() {
     let quote = "that's one small step for [a] man";
 
