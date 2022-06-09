@@ -225,8 +225,8 @@ pub fn assert_command(mut command: impl BorrowMut<Command>, expect: Expect) -> R
 fn format_output(s: &str) -> String {
     let s = strip_color(s).replace('\n', "\n        ");
     let s = s.trim_end();
-    let s = s.replace(::home::home_dir().unwrap().to_str().unwrap(), "~");
     let s = s.replace(env::current_dir().unwrap().to_str().unwrap(), ".");
+    let s = s.replace(::home::home_dir().unwrap().to_str().unwrap(), "~");
     s
 }
 
