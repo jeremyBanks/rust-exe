@@ -38,8 +38,14 @@ fn main() -> eyre::Result<()> {
     match args[0].as_bytes() {
         b"help" => help()?,
         b"run" => run(PathBuf::from(&args[1]), &args[2..])?,
-        b"eval" =>
-            eval(args[1..].iter().map(|s| s.to_str().unwrap()).collect::<Vec<_>>().join(" "), &[])?,
+        b"eval" => eval(
+            args[1..]
+                .iter()
+                .map(|s| s.to_str().unwrap())
+                .collect::<Vec<_>>()
+                .join(" "),
+            &[],
+        )?,
         _ => {
             eprintln!("no such command: {:?}", &args[0]);
             help()?;
@@ -78,7 +84,9 @@ fn run(path: PathBuf, args: &[OsString]) -> Result<()> {
 fn eval(body: String, args: &[OsString]) -> Result<()> {
     let body = format!("fn main() {{ println!(\"{{:#?}}\", {{{body}}}); }}");
     let hash = git_blob_sha1_hex(body.as_bytes());
-    let path = current_dir().unwrap().join(format!("eval_{}.rs", &hash[..8]));
+    let path = current_dir()
+        .unwrap()
+        .join(format!("eval_{}.rs", &hash[..8]));
 
     compile_and_run(path, body, args)
 }

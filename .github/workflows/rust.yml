@@ -11,7 +11,7 @@ on:
     - cron: '44 2 * * 0'
 
 jobs:
-  rust-clippy-analyze:
+  rust:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -24,7 +24,7 @@ jobs:
           toolchain: stable
           components: clippy
 
-      - run: cargo install clippy-sarif sarif-fmt cargo-format
+      - run: cargo install clippy-sarif sarif-fmt
 
       - name: cargo clippy
         run:
@@ -38,7 +38,7 @@ jobs:
           sarif_file: rust-clippy-results.sarif
           wait-for-processing: true
 
-      - run: cargo format --check
+      - run: cargo fmt --check
         continue-on-error: true
 
       - run: cargo test

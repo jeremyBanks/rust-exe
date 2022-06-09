@@ -115,7 +115,7 @@ pub fn compile_and_run(path: PathBuf, body: String, args: &[OsString]) -> Result
                         | syn::UseTree::Rename(syn::UseRename { ident, .. }) => {
                             self.root_crates.insert(ident.to_string());
                         }
-                        syn::UseTree::Group(group) =>
+                        syn::UseTree::Group(group) => {
                             for tree in group.items.iter() {
                                 match tree {
                                     syn::UseTree::Path(syn::UsePath { ident, .. })
@@ -126,7 +126,8 @@ pub fn compile_and_run(path: PathBuf, body: String, args: &[OsString]) -> Result
                                     syn::UseTree::Glob(_) => todo!(),
                                     syn::UseTree::Group(_) => todo!(),
                                 }
-                            },
+                            }
+                        }
                         syn::UseTree::Glob(_) => {
                             eprintln!("This is weird and unexpected: {item_use:?}.");
                         }
@@ -158,16 +159,22 @@ pub fn compile_and_run(path: PathBuf, body: String, args: &[OsString]) -> Result
     };
 
     let builtin_crates: std::collections::BTreeSet<String> =
-        ["core", "alloc", "std", "proc_macro", "test"].iter().map(|s| s.to_string()).collect();
+        ["core", "alloc", "std", "proc_macro", "test"]
+            .iter()
+            .map(|s| s.to_string())
+            .collect();
 
     for root_crate in root_crates {
         if builtin_crates.contains(&root_crate) {
             continue;
         }
 
-        manifest["dependencies"].as_table_mut().unwrap().insert(root_crate.clone(), toml! {
-            version = "*"
-        });
+        manifest["dependencies"].as_table_mut().unwrap().insert(
+            root_crate.clone(),
+            toml! {
+                version = "*"
+            },
+        );
     }
 
     let manifest_path = crate_path.join("Cargo.toml");
@@ -182,21 +189,40 @@ pub fn compile_and_run(path: PathBuf, body: String, args: &[OsString]) -> Result
         .status()?;
 
     let lockfile = Lockfile::load(crate_path.join("Cargo.lock")).unwrap();
-    let package_lock = &lockfile.packages.iter().find(|p| p.name.as_str() == crate_name).unwrap();
+    let package_lock = &lockfile
+        .packages
+        .iter()
+        .find(|p| p.name.as_str() == crate_name)
+        .unwrap();
     let _dependencies = &package_lock
         .dependencies
         .iter()
         .map(|d| format!("{} {}", d.name, d.version))
         .collect::<Vec<_>>();
 
-    std::fs::copy(tmp_dir.join("debug").join(&crate_name), bin_dir.join(&crate_name))?;
+    std::fs::copy(
+        tmp_dir.join("debug").join(&crate_name),
+        bin_dir.join(&crate_name),
+    )?;
 
-    let status =
-        Command::new(bin_dir.join(&crate_name)).args(args).status()?.code().unwrap_or(0xFF);
+    let status = Command::new(bin_dir.join(&crate_name))
+        .args(args)
+        .status()?
+        .code()
+        .unwrap_or(0xFF);
 
-    Command::new("find").arg(src_dir).args(["-mmin", "32", "-delete"]).status()?;
-    Command::new("find").arg(tmp_dir).args(["-atime", "2", "-delete"]).status()?;
-    Command::new("find").arg(bin_dir).args(["-atime", "8", "-delete"]).status()?;
+    Command::new("find")
+        .arg(src_dir)
+        .args(["-mmin", "32", "-delete"])
+        .status()?;
+    Command::new("find")
+        .arg(tmp_dir)
+        .args(["-atime", "2", "-delete"])
+        .status()?;
+    Command::new("find")
+        .arg(bin_dir)
+        .args(["-atime", "8", "-delete"])
+        .status()?;
 
     std::process::exit(status);
 }

@@ -10,98 +10,110 @@ use ::{
 fn test_commands() -> Result<()> {
     // usage
 
-    assert_command(Command::new("rust"), expect![[r#"
-        status: success
-        stdout: 20 bytes/characters
-                #!/usr/bin/env rust
-        stderr: none
-    "#]])?;
+    assert_command(
+        Command::new("rust"),
+        expect![[r#"
+            status: success
+            stdout: 20 bytes/characters
+                    #!/usr/bin/env rust
+            stderr: none
+        "#]],
+    )?;
 
-    assert_command(Command::new("rust").arg("help"), expect![[r#"
-        status: success
-        stdout: 20 bytes/characters
-                #!/usr/bin/env rust
-        stderr: none
-    "#]])?;
+    assert_command(
+        Command::new("rust").arg("help"),
+        expect![[r#"
+            status: success
+            stdout: 20 bytes/characters
+                    #!/usr/bin/env rust
+            stderr: none
+        "#]],
+    )?;
 
-    assert_command(Command::new("rust").arg("encrypt"), expect![[r#"
-        status: success
-        stdout: 20 bytes/characters
-                #!/usr/bin/env rust
-        stderr: 27 bytes/characters
-                no such command: "encrypt"
+    assert_command(
+        Command::new("rust").arg("encrypt"),
+        expect![[r#"
+            status: success
+            stdout: 20 bytes/characters
+                    #!/usr/bin/env rust
+            stderr: 27 bytes/characters
+                    no such command: "encrypt"
 
-    "#]])?;
+        "#]],
+    )?;
 
     // eval (no main)
 
-    assert_command(Command::new("rust").arg("eval").args(["2 +", "2", "* 3"]), expect![[r#"
-    status: success
-    stdout: 2 bytes/characters
-            8
-    stderr: none
-"#]])?;
-
     assert_command(
-        Command::new("rust").arg("eval").args(["Vec::from_iter", "(std::env::args())"]),
+        Command::new("rust").arg("eval").args(["2 +", "2", "* 3"]),
         expect![[r#"
         status: success
-        stdout: 64 bytes/characters
-                [
-                    "~/.rust-exe/bin/eval-b5b43243-b4d08cb3",
-                ]
+        stdout: 2 bytes/characters
+                8
         stderr: none
     "#]],
     )?;
 
+    assert_command(
+        Command::new("rust")
+            .arg("eval")
+            .args(["Vec::from_iter", "(std::env::args())"]),
+        expect![[r#"
+            status: success
+            stdout: 64 bytes/characters
+                    [
+                        "~/.rust-exe/bin/eval-b5b43243-b4d08cb3",
+                    ]
+            stderr: none
+        "#]],
+    )?;
+
     // hello world
 
-    assert_command(Command::new("examples/hello"), expect![[r#"
-        status: success
-        stdout: 12 bytes/characters
-                hello, rust
-        stderr: none
-    "#]])?;
+    assert_command(
+        Command::new("examples/hello"),
+        expect![[r#"
+            status: success
+            stdout: 12 bytes/characters
+                    hello, rust
+            stderr: none
+        "#]],
+    )?;
 
-    assert_command(Command::new("examples/hello.rs"), expect![[r#"
-        status: success
-        stdout: 12 bytes/characters
-                hello, rust
-        stderr: none
-    "#]])?;
+    assert_command(
+        Command::new("examples/hello.rs"),
+        expect![[r#"
+            status: success
+            stdout: 12 bytes/characters
+                    hello, rust
+            stderr: none
+        "#]],
+    )?;
 
-    assert_command(Command::new("rust").arg("examples/hello.rs"), expect![[r#"
-        status: success
-        stdout: 12 bytes/characters
-                hello, rust
-        stderr: none
-    "#]])?;
+    assert_command(
+        Command::new("rust").arg("examples/hello.rs"),
+        expect![[r#"
+            status: success
+            stdout: 12 bytes/characters
+                    hello, rust
+            stderr: none
+        "#]],
+    )?;
 
-    assert_command(Command::new("rust").args(["run", "examples/hello.rs"]), expect![[r#"
-        status: success
-        stdout: 12 bytes/characters
-                hello, rust
-        stderr: none
-    "#]])?;
+    assert_command(
+        Command::new("rust").args(["run", "examples/hello.rs"]),
+        expect![[r#"
+            status: success
+            stdout: 12 bytes/characters
+                    hello, rust
+            stderr: none
+        "#]],
+    )?;
 
     // arguments
 
-    assert_command(Command::new("examples/args.rs").args(["1", "2.0", "three"]), expect![[r#"
-        status: success
-        stdout: none
-        stderr: 177 bytes/characters
-                [args.rs:6] working_dir = "."
-                [args.rs:6] current_exe = "~/.rust-exe/bin/args-f569275b"
-                [args.rs:6] args = [
-                    "1",
-                    "2.0",
-                    "three",
-                ]
-
-    "#]])?;
-
     assert_command(
-        Command::new("rust").arg("examples/args.rs").args(["1", "2.0", "three"]),
+        Command::new("examples/args.rs").args(["1", "2.0", "three"]),
         expect![[r#"
             status: success
             stdout: none
@@ -118,7 +130,28 @@ fn test_commands() -> Result<()> {
     )?;
 
     assert_command(
-        Command::new("rust").args(["run", "examples/args.rs"]).args(["1", "2.0", "three"]),
+        Command::new("rust")
+            .arg("examples/args.rs")
+            .args(["1", "2.0", "three"]),
+        expect![[r#"
+            status: success
+            stdout: none
+            stderr: 177 bytes/characters
+                    [args.rs:6] working_dir = "."
+                    [args.rs:6] current_exe = "~/.rust-exe/bin/args-f569275b"
+                    [args.rs:6] args = [
+                        "1",
+                        "2.0",
+                        "three",
+                    ]
+
+        "#]],
+    )?;
+
+    assert_command(
+        Command::new("rust")
+            .args(["run", "examples/args.rs"])
+            .args(["1", "2.0", "three"]),
         expect![[r#"
             status: success
             stdout: none
@@ -136,26 +169,35 @@ fn test_commands() -> Result<()> {
 
     // inferred dependencies
 
-    assert_command(Command::new("examples/EyRe.rs").args(["1", "2.0", "3"]), expect![[r#"
-        status: success
-        stdout: 16 bytes/characters
-                [1.0, 2.0, 3.0]
-        stderr: none
-    "#]])?;
+    assert_command(
+        Command::new("examples/EyRe.rs").args(["1", "2.0", "3"]),
+        expect![[r#"
+            status: success
+            stdout: 16 bytes/characters
+                    [1.0, 2.0, 3.0]
+            stderr: none
+        "#]],
+    )?;
 
-    assert_command(Command::new("examples/once_cell.rs"), expect![[r#"
-        status: success
-        stdout: 12 bytes/characters
-                hello, rust
-        stderr: none
-    "#]])?;
+    assert_command(
+        Command::new("examples/once_cell.rs"),
+        expect![[r#"
+            status: success
+            stdout: 12 bytes/characters
+                    hello, rust
+            stderr: none
+        "#]],
+    )?;
 
-    assert_command(Command::new("examples/many.rs"), expect![[r#"
-        status: success
-        stdout: 62 bytes/characters
-                D Ghhd Cdz Ig9u Zs Bzb W Fsb C Bzd G Vw Ig Zvci Bb Yv0gb W Fu
-        stderr: none
-    "#]])?;
+    assert_command(
+        Command::new("examples/many.rs"),
+        expect![[r#"
+            status: success
+            stdout: 62 bytes/characters
+                    D Ghhd Cdz Ig9u Zs Bzb W Fsb C Bzd G Vw Ig Zvci Bb Yv0gb W Fu
+            stderr: none
+        "#]],
+    )?;
 
     Ok(())
 }
@@ -168,7 +210,13 @@ pub fn assert_command(mut command: impl BorrowMut<Command>, expect: Expect) -> R
     let status = output
         .status
         .code()
-        .map(|code| if code == 0 { "success".to_string() } else { format!("error {code}") })
+        .map(|code| {
+            if code == 0 {
+                "success".to_string()
+            } else {
+                format!("error {code}")
+            }
+        })
         .unwrap_or("signal".to_string());
 
     let stdout = if output.stdout.is_empty() {
@@ -226,7 +274,14 @@ fn strip_color(s: &str) -> String {
 fn ensure_rust_bin_in_path() {
     static DONE: OnceCell<()> = OnceCell::new();
     DONE.get_or_init(|| {
-        assert_eq!(Command::new("cargo").args(["build"]).status().unwrap().code(), Some(0));
+        assert_eq!(
+            Command::new("cargo")
+                .args(["build"])
+                .status()
+                .unwrap()
+                .code(),
+            Some(0)
+        );
 
         let mut env_path = env::var("PATH").unwrap_or_default();
         let env_dir = env::current_dir().unwrap();
@@ -234,7 +289,9 @@ fn ensure_rust_bin_in_path() {
         let examples_dir = env_dir.join("examples");
         if !env_path.contains(&debug_dir.to_str().unwrap()) {
             env_path = env::join_paths(
-                [debug_dir, examples_dir].into_iter().chain(env::split_paths(&env_path)),
+                [debug_dir, examples_dir]
+                    .into_iter()
+                    .chain(env::split_paths(&env_path)),
             )
             .unwrap()
             .to_str()
