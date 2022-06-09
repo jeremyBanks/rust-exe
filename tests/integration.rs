@@ -14,8 +14,7 @@ fn test_commands() -> Result<()> {
         Command::new("rust"),
         expect![[r#"
             status: success
-            stdout: 20 bytes/characters
-                    #!/usr/bin/env rust
+            stdout: #!/usr/bin/env rust
             stderr: none
         "#]],
     )?;
@@ -24,8 +23,7 @@ fn test_commands() -> Result<()> {
         Command::new("rust").arg("help"),
         expect![[r#"
             status: success
-            stdout: 20 bytes/characters
-                    #!/usr/bin/env rust
+            stdout: #!/usr/bin/env rust
             stderr: none
         "#]],
     )?;
@@ -34,34 +32,33 @@ fn test_commands() -> Result<()> {
         Command::new("rust").arg("encrypt"),
         expect![[r#"
             status: success
-            stdout: 20 bytes/characters
-                    #!/usr/bin/env rust
-            stderr: 27 bytes/characters
-                    no such command: "encrypt"
-
+            stdout: #!/usr/bin/env rust
+            stderr: no such command: "encrypt"
         "#]],
     )?;
 
     // eval (no main)
 
     assert_command(
-        Command::new("rust").arg("eval").current_dir("/").args(["2 +", "2", "* 3"]),
+        Command::new("rust")
+            .arg("eval")
+            .current_dir("/")
+            .args(["2 +", "2", "* 3"]),
         expect![[r#"
-        status: success
-        stdout: 2 bytes/characters
-                8
-        stderr: none
-    "#]],
+            status: success
+            stdout: 8
+            stderr: none
+        "#]],
     )?;
 
     assert_command(
         Command::new("rust")
-            .arg("eval").current_dir("/")
+            .arg("eval")
+            .current_dir("/")
             .args(["Vec::from_iter", "(std::env::args())"]),
         expect![[r#"
             status: success
-            stdout: 64 bytes/characters
-                    [
+            stdout: [
                         "~/.rust-exe/bin/eval-b5b43243-52c39236",
                     ]
             stderr: none
@@ -74,8 +71,7 @@ fn test_commands() -> Result<()> {
         Command::new("examples/hello"),
         expect![[r#"
             status: success
-            stdout: 12 bytes/characters
-                    hello, rust
+            stdout: hello, rust
             stderr: none
         "#]],
     )?;
@@ -84,8 +80,7 @@ fn test_commands() -> Result<()> {
         Command::new("examples/hello.rs"),
         expect![[r#"
             status: success
-            stdout: 12 bytes/characters
-                    hello, rust
+            stdout: hello, rust
             stderr: none
         "#]],
     )?;
@@ -94,8 +89,7 @@ fn test_commands() -> Result<()> {
         Command::new("rust").arg("examples/hello.rs"),
         expect![[r#"
             status: success
-            stdout: 12 bytes/characters
-                    hello, rust
+            stdout: hello, rust
             stderr: none
         "#]],
     )?;
@@ -104,8 +98,7 @@ fn test_commands() -> Result<()> {
         Command::new("rust").args(["run", "examples/hello.rs"]),
         expect![[r#"
             status: success
-            stdout: 12 bytes/characters
-                    hello, rust
+            stdout: hello, rust
             stderr: none
         "#]],
     )?;
@@ -117,15 +110,13 @@ fn test_commands() -> Result<()> {
         expect![[r#"
             status: success
             stdout: none
-            stderr: 177 bytes/characters
-                    [args.rs:6] working_dir = "."
+            stderr: [args.rs:6] working_dir = "."
                     [args.rs:6] current_exe = "~/.rust-exe/bin/args-f569275b"
                     [args.rs:6] args = [
                         "1",
                         "2.0",
                         "three",
                     ]
-
         "#]],
     )?;
 
@@ -136,15 +127,13 @@ fn test_commands() -> Result<()> {
         expect![[r#"
             status: success
             stdout: none
-            stderr: 177 bytes/characters
-                    [args.rs:6] working_dir = "."
+            stderr: [args.rs:6] working_dir = "."
                     [args.rs:6] current_exe = "~/.rust-exe/bin/args-f569275b"
                     [args.rs:6] args = [
                         "1",
                         "2.0",
                         "three",
                     ]
-
         "#]],
     )?;
 
@@ -155,15 +144,13 @@ fn test_commands() -> Result<()> {
         expect![[r#"
             status: success
             stdout: none
-            stderr: 177 bytes/characters
-                    [args.rs:6] working_dir = "."
+            stderr: [args.rs:6] working_dir = "."
                     [args.rs:6] current_exe = "~/.rust-exe/bin/args-f569275b"
                     [args.rs:6] args = [
                         "1",
                         "2.0",
                         "three",
                     ]
-
         "#]],
     )?;
 
@@ -173,8 +160,7 @@ fn test_commands() -> Result<()> {
         Command::new("examples/EyRe.rs").args(["1", "2.0", "3"]),
         expect![[r#"
             status: success
-            stdout: 16 bytes/characters
-                    [1.0, 2.0, 3.0]
+            stdout: [1.0, 2.0, 3.0]
             stderr: none
         "#]],
     )?;
@@ -183,8 +169,7 @@ fn test_commands() -> Result<()> {
         Command::new("examples/once_cell.rs"),
         expect![[r#"
             status: success
-            stdout: 12 bytes/characters
-                    hello, rust
+            stdout: hello, rust
             stderr: none
         "#]],
     )?;
@@ -193,8 +178,7 @@ fn test_commands() -> Result<()> {
         Command::new("examples/many.rs"),
         expect![[r#"
             status: success
-            stdout: 62 bytes/characters
-                    D Ghhd Cdz Ig9u Zs Bzb W Fsb C Bzd G Vw Ig Zvci Bb Yv0gb W Fu
+            stdout: D Ghhd Cdz Ig9u Zs Bzb W Fsb C Bzd G Vw Ig Zvci Bb Yv0gb W Fu
             stderr: none
         "#]],
     )?;
@@ -222,29 +206,13 @@ pub fn assert_command(mut command: impl BorrowMut<Command>, expect: Expect) -> R
     let stdout = if output.stdout.is_empty() {
         "none".to_string()
     } else {
-        let byte_len = output.stdout.len();
-        let stdout = String::from_utf8(output.stdout)?;
-        let char_len = stdout.chars().count();
-        let stdout = format_output(&stdout);
-        if char_len == byte_len {
-            format!("{byte_len} bytes/characters\n        {stdout}")
-        } else {
-            format!("{byte_len} bytes / {char_len} characters\n        {stdout}")
-        }
+        format_output(&String::from_utf8(output.stdout)?)
     };
 
     let stderr = if output.stderr.is_empty() {
         "none".to_string()
     } else {
-        let byte_len = output.stderr.len();
-        let stderr = String::from_utf8(output.stderr)?;
-        let char_len = stderr.chars().count();
-        let stderr = format_output(&stderr);
-        if char_len == byte_len {
-            format!("{byte_len} bytes/characters\n        {stderr}\n")
-        } else {
-            format!("{byte_len} bytes / {char_len} characters\n        {stderr}\n")
-        }
+        format_output(&String::from_utf8(output.stderr)?)
     };
 
     let s = format!("status: {status}\nstdout: {stdout}\nstderr: {stderr}\n");
