@@ -26,6 +26,11 @@ jobs:
           toolchain: stable
           components: clippy
 
+      - run: cargo fmt --check
+        continue-on-error: true
+
+      - run: cargo test
+
       - run: cargo install clippy-sarif sarif-fmt
 
       - name: cargo clippy
@@ -39,8 +44,3 @@ jobs:
         with:
           sarif_file: rust-clippy-results.sarif
           wait-for-processing: true
-
-      - run: cargo fmt --check
-        continue-on-error: true
-
-      - run: cargo test

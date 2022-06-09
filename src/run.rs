@@ -107,6 +107,13 @@ pub fn compile_and_run(path: PathBuf, body: String, args: &[OsString]) -> Result
                 syn::visit::visit_path(self, path);
             }
 
+            fn visit_item_extern_crate(&mut self, item: &'ast syn::ItemExternCrate) {
+                if item.rename.is_some() {
+                    todo!("extern crate with rename not supported");
+                }
+                self.root_crates.insert(item.ident.to_string());
+            }
+
             fn visit_item_use(&mut self, item_use: &'ast syn::ItemUse) {
                 if item_use.leading_colon.is_some() {
                     match &item_use.tree {
