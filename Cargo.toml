@@ -15,7 +15,7 @@ path = "src/main.rs"
 
 [[bin]]
 name = "rust-exe"
-path = "src/main.rs"
+path = "src/main-exe.rs"
 
 [dependencies]
 cargo-lock = { version = "8.0.1", features = ["dependency-tree"] }
