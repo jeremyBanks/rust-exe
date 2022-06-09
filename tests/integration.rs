@@ -45,7 +45,7 @@ fn test_commands() -> Result<()> {
     // eval (no main)
 
     assert_command(
-        Command::new("rust").arg("eval").args(["2 +", "2", "* 3"]),
+        Command::new("rust").arg("eval").current_dir("/").args(["2 +", "2", "* 3"]),
         expect![[r#"
         status: success
         stdout: 2 bytes/characters
@@ -56,13 +56,13 @@ fn test_commands() -> Result<()> {
 
     assert_command(
         Command::new("rust")
-            .arg("eval")
+            .arg("eval").current_dir("/")
             .args(["Vec::from_iter", "(std::env::args())"]),
         expect![[r#"
             status: success
             stdout: 64 bytes/characters
                     [
-                        "~/.rust-exe/bin/eval-b5b43243-b4d08cb3",
+                        "~/.rust-exe/bin/eval-b5b43243-52c39236",
                     ]
             stderr: none
         "#]],
