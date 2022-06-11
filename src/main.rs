@@ -1,3 +1,7 @@
+//! hello, world
+//!
+//! can you see my [crates]?
+
 #[allow(unused)]
 pub(crate) use {
     crate::{hashing::*, run::*},
