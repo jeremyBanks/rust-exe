@@ -20,10 +20,10 @@ pub(crate) use {
     },
 };
 
+mod crates;
 mod hashing;
 mod run;
 mod toolchain;
-mod crates;
 
 fn main() -> eyre::Result<()> {
     color_eyre::install()?;
