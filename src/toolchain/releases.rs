@@ -21,10 +21,11 @@ static RUST_EDITION_RELEASES: &[(u64, u64)] = &[(0, 2015), (31, 2018), (56, 2021
 /// from before the first Rust release. Pre-1.0 releases aren't supported by
 /// rustup, and we don't attempt to support them either.
 pub fn last_release_at(timestamp: u64) -> u64 {
-    if timestamp < RUST_EPOCH_SECONDS {
-        return 0;
+    if timestamp > RUST_EPOCH_SECONDS {
+        ((timestamp - RUST_EPOCH_SECONDS) / RUST_RELEASE_INTERVAL_SECONDS)
+    } else {
+        0
     }
-    return ((timestamp - RUST_EPOCH_SECONDS) / RUST_RELEASE_INTERVAL_SECONDS) as u64;
 }
 
 #[test]
