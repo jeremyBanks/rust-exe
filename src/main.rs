@@ -1,9 +1,34 @@
 #![doc = include_str!("../README.md")]
 
-#[cfg(doc)]
-#[doc = include_str!("../doc/reference.md")]
-pub mod reference {}
+#[doc(hidden)]
+macro_rules! docs {
+        ($( $ident:ident ),* $(,)?) => {
+            $(
+                #[cfg(doc)]
+                pub mod $ident {
+                    #![doc = concat!("[🔗 _", stringify!($ident), "_][self#!]")]
+                    //!
+                    //! <details>
+                    //! <summary>&nbsp;</summary>
+                    //! <br />
+                    //! <div id="!"></div>
+                    //!
+                    #![doc = include_str!(concat!("../doc/", stringify!($ident), ".md"))]
+                    //!
+                    //! <br /><br /><br /><br /><br /><br /><br /><br />
+                    //! <br /><br /><br /><br /><br /><br /><br /><br />
+                    //! <br /><br /><br /><br /><br /><br /><br /><br />
+                    //! <br /><br /><br /><br /><br /><br /><br /><br />
+                    //! </details>
+                    use super::*;
+                }
+            )*
+        }
+    }
 
+docs! {
+    reference,
+}
 #[doc(hidden)]
 #[allow(unused)]
 pub use {
