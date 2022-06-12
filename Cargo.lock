@@ -692,7 +692,7 @@ dependencies = [
 
 [[package]]
 name = "rust-exe"
-version = "0.0.20220612"
+version = "0.0.20220613"
 dependencies = [
  "cargo-lock",
  "color-eyre",
