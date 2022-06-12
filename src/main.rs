@@ -1,34 +1,9 @@
 #![doc = include_str!("../README.md")]
 
-#[doc(hidden)]
-macro_rules! docs {
-        ($( $ident:ident ),* $(,)?) => {
-            $(
-                #[cfg(doc)]
-                pub mod $ident {
-                    #![doc = concat!("[🔗 _", stringify!($ident), "_][self#!]")]
-                    //!
-                    //! <details>
-                    //! <summary>&nbsp;</summary>
-                    //! <br />
-                    //! <div id="!"></div>
-                    //!
-                    #![doc = include_str!(concat!("../doc/", stringify!($ident), ".md"))]
-                    //!
-                    //! <br /><br /><br /><br /><br /><br /><br /><br />
-                    //! <br /><br /><br /><br /><br /><br /><br /><br />
-                    //! <br /><br /><br /><br /><br /><br /><br /><br />
-                    //! <br /><br /><br /><br /><br /><br /><br /><br />
-                    //! </details>
-                    use super::*;
-                }
-            )*
-        }
-    }
+#[cfg(doc)]
+#[doc = include_str!("../ref.md")]
+pub mod r#ref {}
 
-docs! {
-    reference,
-}
 #[doc(hidden)]
 #[allow(unused)]
 pub use {
@@ -53,15 +28,15 @@ pub use {
 };
 
 #[doc(hidden)]
-mod crates;
+pub mod crates;
 #[doc(hidden)]
-mod hashing;
+pub mod hashing;
 #[doc(hidden)]
-mod run;
+pub mod run;
 #[doc(hidden)]
-mod toolchain;
+pub mod toolchain;
 #[doc(hidden)]
-mod util;
+pub mod util;
 
 #[doc(hidden)]
 fn main() -> eyre::Result<()> {

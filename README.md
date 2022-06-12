@@ -4,6 +4,8 @@
 
 [⚠️ **`todo!()`**](https://github.com/jeremyBanks/rust-exe/issues/20)
 
+[📙 **reference**][ref]
+
 ## alternatives / prior art
 
 - [cargo-play](https://github.com/fanzeyi/cargo-play)
@@ -16,3 +18,5 @@
 ## inspirations
 
 - [deno](https://github.com/denoland/deno)
+
+[ref]: ./ref
