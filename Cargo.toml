@@ -7,13 +7,14 @@ edition = "2021"
 license = "MIT OR Apache-2.0"
 name = "rust-exe"
 repository = "https://github.com/jeremyBanks/rust-exe"
-version = "0.0.20220614"
+version = "0.0.20220615"
 
 [[bin]]
 doc = false
 name = "rust"
 path = "src/main.rs"
 
+# this target is just an alias for the sake of the CLI
 [[bin]]
 bench = false
 doc = false
@@ -22,11 +23,12 @@ name = "rust-exe"
 path = "src/main-exe.rs"
 test = false
 
+# this target is just an alias for the sake of docs.rs
 [lib]
 bench = false
 doc = true
 doctest = false
-name = "docs"
+name = "rust_exe"
 path = "src/main-lib.rs"
 test = false
 

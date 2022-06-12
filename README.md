@@ -2,7 +2,7 @@
 
 [⚠️ **`unimplemented!()`**](https://doc.rust-lang.org/std/macro.unimplemented.html)
 
-[📖 **reference**](https://docs.rs/rust-exe/latest/docs/reference/)
+[📖 **reference**](https://docs.rs/rust-exe/latest/rust_exe/reference/)
 
 ## introduction
 
