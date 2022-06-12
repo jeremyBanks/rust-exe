@@ -1,0 +1,13 @@
+{
+    // we `deno fmt` .md and .json files
+    "fmt": {
+        "files": {
+            "exclude": ["target/"]
+        },
+        "options": {
+            // Rust conventions
+            "indentWidth": 4,
+            "lineWidth": 100
+        }
+    }
+}
