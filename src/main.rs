@@ -1,10 +1,13 @@
-//! hello, world
-//!
-//! can you see my [crates]?
+#![doc = include_str!("../README.md")]
 
+#[cfg(doc)]
+#[doc = include_str!("../doc/reference.md")]
+pub mod reference {}
+
+#[doc(hidden)]
 #[allow(unused)]
-pub(crate) use {
-    crate::{hashing::*, run::*},
+pub use {
+    crate::{crates::*, hashing::*, run::*, toolchain::*, util::*},
     ::{
         cargo_lock::Lockfile,
         eyre::Result,
@@ -24,11 +27,18 @@ pub(crate) use {
     },
 };
 
+#[doc(hidden)]
 mod crates;
+#[doc(hidden)]
 mod hashing;
+#[doc(hidden)]
 mod run;
+#[doc(hidden)]
 mod toolchain;
+#[doc(hidden)]
+mod util;
 
+#[doc(hidden)]
 fn main() -> eyre::Result<()> {
     color_eyre::install()?;
     env_logger::try_init()?;
@@ -60,39 +70,4 @@ fn main() -> eyre::Result<()> {
     }
 
     Ok(())
-}
-
-fn is_path_like(s: impl AsRef<[u8]>) -> bool {
-    let s = s.as_ref();
-    if s.starts_with(b"-") {
-        return false;
-    }
-    for byte in s {
-        if matches!(byte, b'/' | b'\\' | b'.') {
-            return true;
-        }
-    }
-    false
-}
-
-fn help() -> Result<()> {
-    println!("#!/usr/bin/env rust");
-
-    std::process::exit(0)
-}
-
-fn run(path: PathBuf, args: &[OsString]) -> Result<()> {
-    let body = std::fs::read_to_string(&path).unwrap();
-
-    compile_and_run(path, body, args)
-}
-
-fn eval(body: String, args: &[OsString]) -> Result<()> {
-    let body = format!("fn main() {{ println!(\"{{:#?}}\", {{{body}}}); }}");
-    let hash = git_blob_sha1_hex(body.as_bytes());
-    let path = current_dir()
-        .unwrap()
-        .join(format!("eval_{}.rs", &hash[..8]));
-
-    compile_and_run(path, body, args)
 }

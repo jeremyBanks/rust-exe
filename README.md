@@ -1,6 +1,8 @@
 # rust-exe: a Rust script runner
 
-[`unimplemented!()`](https://doc.rust-lang.org/std/macro.unimplemented.html)
+[⚠️ **`unimplemented!()`**](https://doc.rust-lang.org/std/macro.unimplemented.html)
+
+[⚠️ **`todo!()`**](https://github.com/jeremyBanks/rust-exe/issues/20)
 
 ## alternatives / prior art
 

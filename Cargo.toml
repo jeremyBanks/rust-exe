@@ -7,13 +7,14 @@ edition = "2021"
 license = "MIT OR Apache-2.0"
 name = "rust-exe"
 repository = "https://github.com/jeremyBanks/rust-exe"
-version = "0.0.20220611"
+version = "0.0.20220612"
 
 [[bin]]
 name = "rust"
 path = "src/main.rs"
 
 [[bin]]
+doc = true
 name = "rust-exe"
 path = "src/main-exe.rs"
 
