@@ -1,16 +1,5 @@
 #!/usr/bin/env rust
-//![#!args]: --verbose
-//![#!date]: ~2022-12-09-16:09:53
-//![#!date]: ~2020
-//![#!rust]: >=1.59.0
-//!
-///[#!syn]: =0.1.0 (-default +std)
-pub mod foo {}
 
-///[#!std]: 0.1.0 (-default +std)
-///[#!std]: toml ({ version = "1.2.4", path = "foo/bar" })
-///[#!syn]: =0.1.0 (-default +std)
-use ::{std, syn};
 use {
     crate::*,
     ::std::{fs, process::Command},
