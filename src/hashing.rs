@@ -1,4 +1,3 @@
-use crate::*;
 use ::{
     sha1::{Digest, Sha1},
     std::fmt::Write,
