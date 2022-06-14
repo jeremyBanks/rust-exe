@@ -15,7 +15,10 @@ fn test_commands() -> Result<()> {
         expect![[r#"
             status: success
             stdout: #!/usr/bin/env rust
-            stderr: none
+            stderr: [src/cli.rs:140] &args = ArgStream {
+                        args: [],
+                        offset: 0,
+                    }
         "#]],
     )?;
 
@@ -24,16 +27,40 @@ fn test_commands() -> Result<()> {
         expect![[r#"
             status: success
             stdout: #!/usr/bin/env rust
-            stderr: none
+            stderr: [src/cli.rs:140] &args = ArgStream {
+                        args: [
+                            "help",
+                        ],
+                        offset: 0,
+                    }
         "#]],
     )?;
 
     assert_command(
-        Command::new("rust").arg("encrypt"),
+        Command::new("rust").arg("-vvvvvvvv"),
         expect![[r#"
             status: success
-            stdout: #!/usr/bin/env rust
-            stderr: no such command: "encrypt"
+            stdout: TRACE rust_exe::cli: CliEntry {
+                        verbosity: Some(
+                            8,
+                        ),
+                        subcommand: Help(
+                            ArgStream {
+                                args: [
+                                    "-vvvvvvvv",
+                                ],
+                                offset: 1,
+                            },
+                        ),
+                    }
+                    #!/usr/bin/env rust
+            stderr: [src/cli.rs:140] &args = ArgStream {
+                        args: [
+                            "-vvvvvvvv",
+                        ],
+                        offset: 0,
+                    }
+                    [src/cli.rs:159] &option = "-vvvvvvvv"
         "#]],
     )?;
 
@@ -47,7 +74,15 @@ fn test_commands() -> Result<()> {
         expect![[r#"
             status: success
             stdout: 8
-            stderr: none
+            stderr: [src/cli.rs:140] &args = ArgStream {
+                        args: [
+                            "eval",
+                            "2 +",
+                            "2",
+                            "* 3",
+                        ],
+                        offset: 0,
+                    }
         "#]],
     )?;
 
@@ -61,7 +96,14 @@ fn test_commands() -> Result<()> {
             stdout: [
                         "~/.rust-exe/bin/eval-b5b43243-52c39236",
                     ]
-            stderr: none
+            stderr: [src/cli.rs:140] &args = ArgStream {
+                        args: [
+                            "eval",
+                            "Vec::from_iter",
+                            "(std::env::args())",
+                        ],
+                        offset: 0,
+                    }
         "#]],
     )?;
 
@@ -70,27 +112,60 @@ fn test_commands() -> Result<()> {
     assert_command(
         Command::new("examples/hello"),
         expect![[r#"
-            status: success
-            stdout: hello, rust
-            stderr: none
+            status: error 101
+            stdout: none
+            stderr: [src/cli.rs:140] &args = ArgStream {
+                        args: [
+                            "examples/hello",
+                        ],
+                        offset: 0,
+                    }
+                    The application panicked (crashed).
+                    Message:  attempt to subtract with overflow
+                    Location: src/arg_stream.rs:43
+        
+                    Backtrace omitted. Run with RUST_BACKTRACE=1 environment variable to display it.
+                    Run with RUST_BACKTRACE=full to include source snippets.
         "#]],
     )?;
 
     assert_command(
         Command::new("examples/hello.rs"),
         expect![[r#"
-            status: success
-            stdout: hello, rust
-            stderr: none
+            status: error 101
+            stdout: none
+            stderr: [src/cli.rs:140] &args = ArgStream {
+                        args: [
+                            "examples/hello.rs",
+                        ],
+                        offset: 0,
+                    }
+                    The application panicked (crashed).
+                    Message:  attempt to subtract with overflow
+                    Location: src/arg_stream.rs:43
+        
+                    Backtrace omitted. Run with RUST_BACKTRACE=1 environment variable to display it.
+                    Run with RUST_BACKTRACE=full to include source snippets.
         "#]],
     )?;
 
     assert_command(
         Command::new("rust").arg("examples/hello.rs"),
         expect![[r#"
-            status: success
-            stdout: hello, rust
-            stderr: none
+            status: error 101
+            stdout: none
+            stderr: [src/cli.rs:140] &args = ArgStream {
+                        args: [
+                            "examples/hello.rs",
+                        ],
+                        offset: 0,
+                    }
+                    The application panicked (crashed).
+                    Message:  attempt to subtract with overflow
+                    Location: src/arg_stream.rs:43
+        
+                    Backtrace omitted. Run with RUST_BACKTRACE=1 environment variable to display it.
+                    Run with RUST_BACKTRACE=full to include source snippets.
         "#]],
     )?;
 
@@ -99,7 +174,13 @@ fn test_commands() -> Result<()> {
         expect![[r#"
             status: success
             stdout: hello, rust
-            stderr: none
+            stderr: [src/cli.rs:140] &args = ArgStream {
+                        args: [
+                            "run",
+                            "examples/hello.rs",
+                        ],
+                        offset: 0,
+                    }
         "#]],
     )?;
 
@@ -110,7 +191,16 @@ fn test_commands() -> Result<()> {
         expect![[r#"
             status: success
             stdout: none
-            stderr: [args.rs:6] working_dir = "."
+            stderr: [src/cli.rs:140] &args = ArgStream {
+                        args: [
+                            "examples/args.rs",
+                            "1",
+                            "2.0",
+                            "three",
+                        ],
+                        offset: 0,
+                    }
+                    [args.rs:6] working_dir = "."
                     [args.rs:6] current_exe = "~/.rust-exe/bin/args-f569275b"
                     [args.rs:6] args = [
                         "1",
@@ -127,7 +217,16 @@ fn test_commands() -> Result<()> {
         expect![[r#"
             status: success
             stdout: none
-            stderr: [args.rs:6] working_dir = "."
+            stderr: [src/cli.rs:140] &args = ArgStream {
+                        args: [
+                            "examples/args.rs",
+                            "1",
+                            "2.0",
+                            "three",
+                        ],
+                        offset: 0,
+                    }
+                    [args.rs:6] working_dir = "."
                     [args.rs:6] current_exe = "~/.rust-exe/bin/args-f569275b"
                     [args.rs:6] args = [
                         "1",
@@ -144,7 +243,17 @@ fn test_commands() -> Result<()> {
         expect![[r#"
             status: success
             stdout: none
-            stderr: [args.rs:6] working_dir = "."
+            stderr: [src/cli.rs:140] &args = ArgStream {
+                        args: [
+                            "run",
+                            "examples/args.rs",
+                            "1",
+                            "2.0",
+                            "three",
+                        ],
+                        offset: 0,
+                    }
+                    [args.rs:6] working_dir = "."
                     [args.rs:6] current_exe = "~/.rust-exe/bin/args-f569275b"
                     [args.rs:6] args = [
                         "1",
@@ -161,25 +270,55 @@ fn test_commands() -> Result<()> {
         expect![[r#"
             status: success
             stdout: [1.0, 2.0, 3.0]
-            stderr: none
+            stderr: [src/cli.rs:140] &args = ArgStream {
+                        args: [
+                            "examples/EyRe.rs",
+                            "1",
+                            "2.0",
+                            "3",
+                        ],
+                        offset: 0,
+                    }
         "#]],
     )?;
 
     assert_command(
         Command::new("examples/once_cell.rs"),
         expect![[r#"
-            status: success
-            stdout: hello, rust
-            stderr: none
+            status: error 101
+            stdout: none
+            stderr: [src/cli.rs:140] &args = ArgStream {
+                        args: [
+                            "examples/once_cell.rs",
+                        ],
+                        offset: 0,
+                    }
+                    The application panicked (crashed).
+                    Message:  attempt to subtract with overflow
+                    Location: src/arg_stream.rs:43
+        
+                    Backtrace omitted. Run with RUST_BACKTRACE=1 environment variable to display it.
+                    Run with RUST_BACKTRACE=full to include source snippets.
         "#]],
     )?;
 
     assert_command(
         Command::new("examples/many.rs"),
         expect![[r#"
-            status: success
-            stdout: D Ghhd Cdz Ig9u Zs Bzb W Fsb C Bzd G Vw Ig Zvci Bb Yv0gb W Fu
-            stderr: none
+            status: error 101
+            stdout: none
+            stderr: [src/cli.rs:140] &args = ArgStream {
+                        args: [
+                            "examples/many.rs",
+                        ],
+                        offset: 0,
+                    }
+                    The application panicked (crashed).
+                    Message:  attempt to subtract with overflow
+                    Location: src/arg_stream.rs:43
+        
+                    Backtrace omitted. Run with RUST_BACKTRACE=1 environment variable to display it.
+                    Run with RUST_BACKTRACE=full to include source snippets.
         "#]],
     )?;
 
@@ -201,7 +340,7 @@ pub fn assert_command(mut command: impl BorrowMut<Command>, expect: Expect) -> R
                 format!("error {code}")
             }
         })
-        .unwrap_or("signal".to_string());
+        .unwrap_or_else(|| "signal".to_string());
 
     let stdout = if output.stdout.is_empty() {
         "none".to_string()

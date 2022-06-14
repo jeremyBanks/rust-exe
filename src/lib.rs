@@ -6,7 +6,7 @@ pub mod reference {
 }
 
 #[cfg(test)]
-pub(crate) use expect_test::{expect, Expect};
+pub(crate) use expect_test::expect;
 
 #[doc(hidden)]
 #[allow(unused)]

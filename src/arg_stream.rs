@@ -2,154 +2,11 @@
 
 use crate::*;
 
-#[test]
-fn test_cli_entry() {
-    expect![[r#"
-        Ok(
-            CliEntry {
-                verbosity: None,
-                subcommand: Run(
-                    ArgStream {
-                        args: [
-                            "run",
-                            "./target/debug/hello",
-                            "world",
-                        ],
-                        offset: 1,
-                    },
-                ),
-            },
-        )
-    "#]]
-    .assert_debug_eq(&CliEntry::try_new(
-        ["./target/debug/hello", "world"]
-            .iter()
-            .map(Into::into)
-            .collect(),
-    ));
-
-    expect![[r#"
-        Ok(
-            CliEntry {
-                verbosity: Some(
-                    -1,
-                ),
-                subcommand: Build(
-                    ArgStream {
-                        args: [
-                            "--verbose",
-                            "build",
-                            "-qq",
-                            "./hello.rs",
-                            "world",
-                        ],
-                        offset: 3,
-                    },
-                ),
-            },
-        )
-    "#]]
-    .assert_debug_eq(&CliEntry::try_new(
-        ["--verbose", "build", "-qq", "./hello.rs", "world"]
-            .iter()
-            .map(Into::into)
-            .collect(),
-    ));
-}
-
-#[derive(Debug, Clone)]
-pub struct CliEntry {
-    pub verbosity: Option<i32>,
-    pub subcommand: Subcommand,
-}
-
-impl CliEntry {
-    pub fn try_new(args: Vec<OsString>) -> eyre::Result<Self> {
-        let mut args = ArgStream::new(args);
-
-        dbg!(&args);
-
-        if let Some(leading_path) = args.peek_path() {
-            args.push_front("run".into());
-        }
-
-        let mut verbosity: Option<i32> = None;
-
-        let options_before_subcommand = args.next_options();
-
-        dbg!(&args);
-        let subcommand = args.next_subcommand().expect("missing subcommand");
-
-        let options_after_subcommand = args.next_options();
-
-        let options = options_before_subcommand
-            .into_iter()
-            .chain(options_after_subcommand);
-
-        for option in options {
-            dbg!(&option);
-            if let Some(option_bytes) = option.as_bytes().strip_prefix(b"--") {
-                match option_bytes {
-                    b"verbose" => {
-                        verbosity = Some(verbosity.unwrap_or(0) + 1);
-                    }
-                    b"quiet" => {
-                        verbosity = Some(verbosity.unwrap_or(0) - 1);
-                    }
-                    _ => {
-                        eyre::bail!("unrecognized long argument: {:?}", option.to_string_lossy());
-                    }
-                }
-            } else if let Some(option_bytes) = option.as_bytes().strip_prefix(b"-") {
-                for arg_byte in option_bytes {
-                    match arg_byte {
-                        b'v' => {
-                            verbosity = Some(verbosity.unwrap_or(0) + 1);
-                        }
-                        b'q' => {
-                            verbosity = Some(verbosity.unwrap_or(0) - 1);
-                        }
-                        _ => {
-                            eyre::bail!(
-                                "unrecognized short argument: {:?}",
-                                option.to_string_lossy()
-                            );
-                        }
-                    }
-                }
-            } else {
-                unreachable!()
-            }
-        }
-
-        Ok(CliEntry {
-            verbosity,
-            subcommand: match subcommand.as_bytes() {
-                b"run" => Subcommand::Run(args),
-                b"build" => Subcommand::Build(args),
-                b"help" => Subcommand::Build(args),
-                _ => eyre::bail!(
-                    "unrecognized subcommand: {:?}",
-                    subcommand.to_string_lossy()
-                ),
-            },
-        })
-    }
-}
-
 #[derive(Debug, Clone)]
 pub struct ArgStream {
     args: Vec<OsString>,
     offset: usize,
 }
-
-#[derive(Debug, Clone)]
-pub enum Subcommand {
-    Run(ArgStream),
-    Build(ArgStream),
-    Help(ArgStream),
-}
-
 impl ArgStream {
     pub fn new(args: Vec<OsString>) -> Self {
         Self { args, offset: 0 }
@@ -243,7 +100,7 @@ impl ArgStream {
     }
 
     pub fn next_parse<Out: FromStr>(&mut self) -> Option<Out> {
-        self.next_if(|s| Some(s.to_str()?.parse().ok()?))
+        self.next_if(|s| s.to_str()?.parse().ok())
     }
 
     pub fn next_option(&mut self) -> Option<OsString> {
@@ -328,29 +185,29 @@ impl Iterator for ArgStream {
 #[test]
 fn test_helpers() {
     let hello = b"hello";
-    assert_eq!(false, is_argument_like(hello));
-    assert_eq!(true, is_subcommand_like(hello));
-    assert_eq!(false, is_path_like(hello));
+    assert!(!is_argument_like(hello));
+    assert!(is_subcommand_like(hello));
+    assert!(!is_path_like(hello));
 
     let hello_world = b"hello world";
-    assert_eq!(false, is_argument_like(hello_world));
-    assert_eq!(false, is_subcommand_like(hello_world));
-    assert_eq!(false, is_path_like(hello_world));
+    assert!(!is_argument_like(hello_world));
+    assert!(!is_subcommand_like(hello_world));
+    assert!(!is_path_like(hello_world));
 
     let hello_slash_world = b"hello/world";
-    assert_eq!(false, is_argument_like(hello_slash_world));
-    assert_eq!(false, is_subcommand_like(hello_slash_world));
-    assert_eq!(true, is_path_like(hello_slash_world));
+    assert!(!is_argument_like(hello_slash_world));
+    assert!(!is_subcommand_like(hello_slash_world));
+    assert!(is_path_like(hello_slash_world));
 
     let dash_vvvv = b"-vvvv";
-    assert_eq!(true, is_argument_like(dash_vvvv));
-    assert_eq!(false, is_subcommand_like(dash_vvvv));
-    assert_eq!(false, is_path_like(dash_vvvv));
+    assert!(is_argument_like(dash_vvvv));
+    assert!(!is_subcommand_like(dash_vvvv));
+    assert!(!is_path_like(dash_vvvv));
 
     let dot_slash_dash_vvvv = b"./-vvvv";
-    assert_eq!(false, is_argument_like(dot_slash_dash_vvvv));
-    assert_eq!(false, is_subcommand_like(dot_slash_dash_vvvv));
-    assert_eq!(true, is_path_like(dot_slash_dash_vvvv));
+    assert!(!is_argument_like(dot_slash_dash_vvvv));
+    assert!(!is_subcommand_like(dot_slash_dash_vvvv));
+    assert!(is_path_like(dot_slash_dash_vvvv));
 }
 
 fn is_argument_like(s: &[u8]) -> bool {
