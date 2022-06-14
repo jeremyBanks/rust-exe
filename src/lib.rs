@@ -8,7 +8,7 @@ pub mod reference {
 #[doc(hidden)]
 #[allow(unused)]
 pub(crate) use {
-    crate::{arg_stream::*, cli::*, crates::*, hashing::*, run::*, toolchain::*, util::*},
+    crate::{arg_stream::*, cli::*, crates::*, git_hashing::*, run::*, toolchain::*, util::*},
     ::{
         cargo_lock::Lockfile,
         eyre::Result,
@@ -37,7 +37,7 @@ pub(crate) mod cli;
 #[doc(hidden)]
 pub(crate) mod crates;
 #[doc(hidden)]
-pub(crate) mod hashing;
+pub(crate) mod git_hashing;
 #[doc(hidden)]
 pub(crate) mod run;
 #[doc(hidden)]
