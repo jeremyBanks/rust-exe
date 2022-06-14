@@ -5,6 +5,9 @@ pub mod reference {
     #![doc = include_str!("../reference.md")]
 }
 
+#[cfg(test)]
+pub(crate) use expect_test::{expect, Expect};
+
 #[doc(hidden)]
 #[allow(unused)]
 pub(crate) use {
@@ -16,6 +19,7 @@ pub(crate) use {
         indexmap::{IndexMap, IndexSet},
         quote::quote,
         serde_json::{json, Value as Json},
+        std::str::FromStr,
         std::{
             self,
             env::current_dir,

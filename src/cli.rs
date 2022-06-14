@@ -56,7 +56,7 @@ pub fn main() -> eyre::Result<()> {
             .finish(),
     ));
 
-    let mut args: Vec<OsString> = arg.iter().map(|x| OsString::clone(x)).collect();
+    let mut args: Vec<OsString> = arg.iter().map(OsString::clone).collect();
 
     trace!("args = {args:?}");
     trace!("exe = {exe:?}");
