@@ -1,3 +1,5 @@
+#!/usr/bin/env rust
+
 use crate::*;
 
 #[allow(unused)]

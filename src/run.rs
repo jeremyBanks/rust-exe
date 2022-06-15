@@ -1,5 +1,3 @@
-#!/usr/bin/env rust
-
 use {
     crate::*,
     ::std::{fs, process::Command},
@@ -8,8 +6,10 @@ use {
 pub fn compile_and_run(path: PathBuf, body: String, args: &[OsString]) -> Result<()> {
     let data_dir = ::home::home_dir().unwrap_or_default().join(".rust-exe");
     let src_dir = data_dir.join("src");
-    let tmp_dir = data_dir.join("tmp");
     let bin_dir = data_dir.join("bin");
+    let tmp_dir = std::env::temp_dir().join(".rust-exe");
+
+    trace!("{data_dir:?} {tmp_dir:?}");
 
     fs::create_dir_all(&src_dir).unwrap();
     fs::create_dir_all(&tmp_dir).unwrap();
@@ -184,19 +184,6 @@ pub fn compile_and_run(path: PathBuf, body: String, args: &[OsString]) -> Result
         .status()?
         .code()
         .unwrap_or(0xFF);
-
-    Command::new("find")
-        .arg(src_dir)
-        .args(["-mmin", "32", "-delete"])
-        .status()?;
-    Command::new("find")
-        .arg(tmp_dir)
-        .args(["-atime", "2", "-delete"])
-        .status()?;
-    Command::new("find")
-        .arg(bin_dir)
-        .args(["-atime", "8", "-delete"])
-        .status()?;
 
     std::process::exit(status);
 }
