@@ -15,8 +15,6 @@ on:
 jobs:
   rust-test:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
     steps:
       - uses: actions/checkout@v3
 
@@ -28,8 +26,6 @@ jobs:
 
   rust-fmt:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
     steps:
       - uses: actions/checkout@v3
 
@@ -41,9 +37,6 @@ jobs:
 
   rust-clippy:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      security-events: write
     steps:
       - uses: actions/checkout@v3
 
@@ -52,16 +45,14 @@ jobs:
           toolchain: stable
           components: clippy
 
-      - run: cargo install clippy-sarif sarif-fmt
-
       - name: cargo clippy
-        run:
-          cargo clippy
-          --all-features
-          --message-format=json | clippy-sarif | tee rust-clippy-results.sarif | sarif-fmt
-        continue-on-error: true
+        run: cargo clippy --all-features
 
-      - uses: github/codeql-action/upload-sarif@v2
-        with:
-          sarif_file: rust-clippy-results.sarif
-          wait-for-processing: true
+  ok:
+    needs:
+      - rust-test
+      - rust-clippy
+      - rust-fmt
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
