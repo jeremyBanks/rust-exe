@@ -1,7 +1,6 @@
-#![allow(unused)]
-
 use crate::*;
 
+/// A deque/stream-like structure with helpers we use for parsing arguments.
 #[derive(Debug, Clone)]
 pub struct ArgStream {
     args: Vec<OsString>,
@@ -20,7 +19,7 @@ impl ArgStream {
         self.args.push(arg);
     }
 
-    pub fn all(&self) -> &[OsString] {
+    pub fn as_slice(&self) -> &[OsString] {
         &self.args[self.offset..]
     }
 
@@ -150,7 +149,7 @@ impl ArgStream {
 
 impl AsRef<[OsString]> for ArgStream {
     fn as_ref(&self) -> &[OsString] {
-        self.all()
+        self.as_slice()
     }
 }
 
@@ -159,7 +158,7 @@ impl<'arg_stream> IntoIterator for &'arg_stream ArgStream {
     type IntoIter = std::slice::Iter<'arg_stream, OsString>;
 
     fn into_iter(self) -> Self::IntoIter {
-        self.all().iter()
+        self.as_slice().iter()
     }
 }
 

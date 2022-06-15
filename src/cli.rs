@@ -47,7 +47,7 @@ pub fn main() -> eyre::Result<()> {
 
     match entry.subcommand {
         Subcommand::Help(_args) => help()?,
-        Subcommand::Run(mut args) => run(args.next_path().unwrap(), args.all())?,
+        Subcommand::Run(mut args) => run(args.next_path().unwrap(), args.as_slice())?,
         Subcommand::Eval(args) => eval(
             args.into_iter()
                 .map(|s| s.into_string().unwrap())
