@@ -35,7 +35,7 @@ impl ArgStream {
         } else {
             let old_capacity = self.args.capacity();
 
-            let added_capacity = old_capacity.min(8);
+            let added_capacity = old_capacity.max(8);
             let new_capacity = old_capacity + added_capacity;
 
             let new_args = Vec::with_capacity(new_capacity);

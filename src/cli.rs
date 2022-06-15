@@ -69,12 +69,17 @@ fn test_cli_entry() {
                 ArgStream {
                     args: [
                         "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
                         "run",
                         "./target/debug/hello",
                         "--to",
                         "world",
                     ],
-                    offset: 2,
+                    offset: 7,
                 },
             ),
         }
@@ -137,8 +142,6 @@ impl CliEntry {
     pub fn try_new(args: Vec<OsString>) -> eyre::Result<Self> {
         let mut args = ArgStream::new(args);
 
-        dbg!(&args);
-
         if args.peek_path().is_some() {
             args.push_front("run".into());
         }
@@ -156,7 +159,6 @@ impl CliEntry {
             .chain(options_after_subcommand);
 
         for option in options {
-            dbg!(&option);
             if let Some(option_bytes) = option.as_bytes().strip_prefix(b"--") {
                 match option_bytes {
                     b"verbose" => {
