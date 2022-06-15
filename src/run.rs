@@ -1,5 +1,3 @@
-#!/usr/bin/env rust
-
 use {
     crate::*,
     ::std::{fs, process::Command},
@@ -184,19 +182,6 @@ pub fn compile_and_run(path: PathBuf, body: String, args: &[OsString]) -> Result
         .status()?
         .code()
         .unwrap_or(0xFF);
-
-    Command::new("find")
-        .arg(src_dir)
-        .args(["-mmin", "32", "-delete"])
-        .status()?;
-    Command::new("find")
-        .arg(tmp_dir)
-        .args(["-atime", "2", "-delete"])
-        .status()?;
-    Command::new("find")
-        .arg(bin_dir)
-        .args(["-atime", "8", "-delete"])
-        .status()?;
 
     std::process::exit(status);
 }
