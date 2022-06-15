@@ -1,4 +1,5 @@
 #![doc = include_str!("../README.md")]
+#![warn(unused_crate_dependencies)]
 
 #[cfg(doc)]
 pub mod reference {
@@ -17,8 +18,6 @@ pub(crate) use {
         eyre::Result,
         heck::*,
         indexmap::{IndexMap, IndexSet},
-        quote::quote,
-        serde_json::{json, Value as Json},
         std::str::FromStr,
         std::{
             self,

@@ -1,5 +1,5 @@
-pr-status = [ 'rust / ok' ]
-status = [ 'rust / ok' ]
+pr-status = [ 'rust' ]
+status = [ 'rust' ]
 
 [committer]
 email = "107450506+rust-exe[bot]@users.noreply.github.com"
