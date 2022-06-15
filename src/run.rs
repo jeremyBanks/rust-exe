@@ -7,9 +7,7 @@ pub fn compile_and_run(path: PathBuf, body: String, args: &[OsString]) -> Result
     let data_dir = ::home::home_dir().unwrap_or_default().join(".rust-exe");
     let src_dir = data_dir.join("src");
     let bin_dir = data_dir.join("bin");
-    let tmp_dir = std::env::temp_dir().join(".rust-exe");
-
-    trace!("{data_dir:?} {tmp_dir:?}");
+    let tmp_dir = std::env::temp_dir().join("rust-exe");
 
     fs::create_dir_all(&src_dir).unwrap();
     fs::create_dir_all(&tmp_dir).unwrap();
