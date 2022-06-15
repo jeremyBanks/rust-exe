@@ -10,7 +10,7 @@ pub fn main() -> eyre::Result<()> {
     let cwd = &std::env::current_dir()?;
     let env: &IndexMap<OsString, OsString> = &std::env::vars_os().collect();
 
-    let entry = CliEntry::try_new(arg.iter().cloned().collect())?;
+    let entry = CliEntry::try_new(arg.to_vec())?;
 
     let default_verbosity = 3;
 
