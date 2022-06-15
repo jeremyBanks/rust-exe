@@ -1,18 +1,5 @@
 use crate::*;
 
-pub fn is_path_like(s: impl AsRef<[u8]>) -> bool {
-    let s = s.as_ref();
-    if s.starts_with(b"-") {
-        return false;
-    }
-    for byte in s {
-        if matches!(byte, b'/' | b'\\' | b'.') {
-            return true;
-        }
-    }
-    false
-}
-
 pub fn help() -> Result<()> {
     println!("#!/usr/bin/env rust");
 

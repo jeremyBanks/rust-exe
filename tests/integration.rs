@@ -29,11 +29,33 @@ fn test_commands() -> Result<()> {
     )?;
 
     assert_command(
-        Command::new("rust").arg("encrypt"),
+        Command::new("rust").arg("-vvvvvvvv"),
+        expect![[r#"
+            status: success
+            stdout: TRACE rust_exe::cli: CliEntry {
+                        verbosity: Some(
+                            8,
+                        ),
+                        subcommand: Help(
+                            ArgStream {
+                                args: [
+                                    "-vvvvvvvv",
+                                ],
+                                offset: 1,
+                            },
+                        ),
+                    }
+                    #!/usr/bin/env rust
+            stderr: none
+        "#]],
+    )?;
+
+    assert_command(
+        Command::new("rust").args(["-qqqqqqqqqq", "--verbose", "-v", "--quiet"]),
         expect![[r#"
             status: success
             stdout: #!/usr/bin/env rust
-            stderr: no such command: "encrypt"
+            stderr: none
         "#]],
     )?;
 
@@ -201,7 +223,7 @@ pub fn assert_command(mut command: impl BorrowMut<Command>, expect: Expect) -> R
                 format!("error {code}")
             }
         })
-        .unwrap_or("signal".to_string());
+        .unwrap_or_else(|| "signal".to_string());
 
     let stdout = if output.stdout.is_empty() {
         "none".to_string()

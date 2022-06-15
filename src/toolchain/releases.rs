@@ -1,9 +1,5 @@
 #![allow(unused)]
 
-/// The unix timestamp of the first crates.io index commit, rounded to noon UTC:
-/// 2014-11-04T12:00:00Z.
-static CRATES_EPOCH_SECONDS: u64 = 1_415_102_400;
-
 /// The unix timestamp of the Rust 1.0.0 release, rounded to noon UTC:
 /// 2015-05-15T12:00:00Z.
 static RUST_EPOCH_SECONDS: u64 = 1_431_691_200;

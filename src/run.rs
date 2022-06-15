@@ -1,16 +1,5 @@
 #!/usr/bin/env rust
-//![#!args]: --verbose
-//![#!date]: ~2022-12-09-16:09:53
-//![#!date]: ~2020
-//![#!rust]: >=1.59.0
-//!
-///[#!syn]: =0.1.0 (-default +std)
-pub mod foo {}
 
-///[#!std]: 0.1.0 (-default +std)
-///[#!std]: toml ({ version = "1.2.4", path = "foo/bar" })
-///[#!syn]: =0.1.0 (-default +std)
-use ::{std, syn};
 use {
     crate::*,
     ::std::{fs, process::Command},
@@ -28,10 +17,10 @@ pub fn compile_and_run(path: PathBuf, body: String, args: &[OsString]) -> Result
 
     let _mtime = SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs_f64();
 
-    let hash = hashing::git_blob_sha1_hex(body.as_bytes());
+    let hash = git_hashing::git_blob_sha1_hex(body.as_bytes());
     let hash8 = &hash[..8];
 
-    let path_hash = hashing::git_blob_sha1_hex(path.as_os_str().as_bytes());
+    let path_hash = git_hashing::git_blob_sha1_hex(path.as_os_str().as_bytes());
     let path8 = &path_hash[..8];
 
     let name = path.as_path().file_stem().unwrap().to_string_lossy();
