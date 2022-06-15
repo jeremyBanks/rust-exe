@@ -50,8 +50,8 @@ jobs:
 
   ok:
     needs:
-      # - rust-test
-      # - rust-clippy
+      - rust-test
+      - rust-clippy
       - rust-fmt
     runs-on: ubuntu-latest
     steps:
