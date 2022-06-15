@@ -421,6 +421,7 @@ dependencies = [
  "heck",
  "home",
  "indexmap",
+ "once_cell",
  "sha-1",
  "syn",
  "toml_edit",
