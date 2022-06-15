@@ -1,5 +1,5 @@
 #![doc = include_str!("../README.md")]
-#![warn(unused_crate_dependencies)]
+#![allow(unused_crate_dependencies)]
 
 #[cfg(doc)]
 pub mod reference {
