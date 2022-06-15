@@ -6,11 +6,15 @@ on:
       - trunk
       - staging
       - trying
+
   pull_request:
     branches:
       - trunk
+
   schedule:
     - cron: '44 2 * * 0'
+
+  workflow_dispatch:
 
 jobs:
   rust-test:
@@ -22,7 +26,9 @@ jobs:
         with:
           toolchain: stable
 
-      - run: cargo test
+      - uses: actions-rs/cargo@v1
+        with:
+          command: test
 
   rust-fmt:
     runs-on: ubuntu-latest
@@ -33,7 +39,10 @@ jobs:
         with:
           toolchain: stable
 
-      - run: cargo fmt --check
+      - uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: --check
 
   rust-clippy:
     runs-on: ubuntu-latest
@@ -45,8 +54,10 @@ jobs:
           toolchain: stable
           components: clippy
 
-      - name: cargo clippy
-        run: cargo clippy --all-features
+      - uses: actions-rs/clippy-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: --all-features
 
   ok:
     needs:
