@@ -4,9 +4,9 @@ use ::{
     std::fmt::Write,
 };
 
-// If we want a static hash representing a tree of files with mtimes, maybe we could
-// construct it as though we have a git repo with those files committed as those times,
-// for consistency.
+// If we want a static hash representing a tree of files with mtimes, maybe we
+// could construct it as though we have a git repo with those files committed as
+// those times, for consistency.
 // Although this might be a lot of pointless complexity that should be deferred.
 
 static GIT_USER_NAME: &str = "rust-exe[bot]";

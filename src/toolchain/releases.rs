@@ -13,9 +13,9 @@ static RUST_EDITION_RELEASES: &[(u64, u64)] = &[(0, 2015), (31, 2018), (56, 2021
 
 /// Returns the minor version number of the most recent Rust release at a given
 /// timestamp. For example, this would return `59` if given a timestamp shortly
-/// after the Rust 1.59.0 release. Rounds up to version 1.0.0 if given a timestamp
-/// from before the first Rust release. Pre-1.0 releases aren't supported by
-/// rustup, and we don't attempt to support them either.
+/// after the Rust 1.59.0 release. Rounds up to version 1.0.0 if given a
+/// timestamp from before the first Rust release. Pre-1.0 releases aren't
+/// supported by rustup, and we don't attempt to support them either.
 pub fn last_release_at(timestamp: u64) -> u64 {
     if timestamp > RUST_EPOCH_SECONDS {
         ((timestamp - RUST_EPOCH_SECONDS) / RUST_RELEASE_INTERVAL_SECONDS)

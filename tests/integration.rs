@@ -266,7 +266,7 @@ fn ensure_rust_bin_in_path() {
     DONE.get_or_init(|| {
         assert_eq!(
             Command::new("cargo")
-                .args(["build"])
+                .args(["build", "--target-dir=target"])
                 .status()
                 .unwrap()
                 .code(),

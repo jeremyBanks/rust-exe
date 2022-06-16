@@ -8,7 +8,6 @@ pub mod reference {
 
 #[cfg(test)]
 pub(crate) use expect_test::expect;
-
 #[doc(hidden)]
 #[allow(unused)]
 pub(crate) use {
@@ -18,7 +17,11 @@ pub(crate) use {
         eyre::Result,
         heck::*,
         indexmap::{IndexMap, IndexSet},
+        std::collections::BTreeMap,
+        std::collections::VecDeque,
+        std::rc::Rc,
         std::str::FromStr,
+        std::sync::Arc,
         std::{
             self,
             env::current_dir,
