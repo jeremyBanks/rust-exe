@@ -18,4 +18,4 @@ RUN    rustup toolchain add stable beta nightly \
     && rustup component add --toolchain nightly rustfmt clippy         \
     && rustup target    add wasm32-wasi wasm32-unknown-unknown
 
-RUN cargo install cargo-expand cargo-udeps cargo-watch git-uncommit https ripgrep rust-exe tokio-console
+RUN cargo install cargo-expand cargo-udeps cargo-watch git-uncommit https ripgrep tokio-console
