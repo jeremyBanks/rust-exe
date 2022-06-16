@@ -30,7 +30,21 @@ jobs:
         with:
           command: test
 
-  rust-fmt:
+  rust-fmt-nightly:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+
+      - uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: --check
+
+  rust-fmt-stable:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -38,6 +52,8 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
+
+      - run: rm rustfmt.toml
 
       - uses: actions-rs/cargo@v1
         with:
@@ -63,7 +79,8 @@ jobs:
     needs:
       - rust-test
       - rust-clippy
-      - rust-fmt
+      - rust-fmt-stable
+      - rust-fmt-nightly
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

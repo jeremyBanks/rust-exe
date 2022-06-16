@@ -3,7 +3,8 @@ FROM mcr.microsoft.com/vscode/devcontainers/universal:1-linux
 USER root
 
 ENV DENO_INSTALL=/deno \
-    DENO_DIR=/deno/.cache/deno
+    DENO_DIR=/deno/.cache/deno \
+    CARGO_TARGET_DIR=/tmp/rust-exe
 
 RUN mkdir -p /deno \
     && curl -fsSL https://deno.land/x/install/install.sh | sh \
