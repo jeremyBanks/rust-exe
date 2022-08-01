@@ -31,6 +31,6 @@ syn = { version = "1.0.98", features = ["full", "extra-traits", "visit"] }
 toml_edit = { version = "0.14.4", features = ["easy", "serde"] }
 tracing = "0.1.35"
 tracing-error = "0.2.0"
-tracing-subscriber = { version = "0.3.11", features = ["std", "env-filter"] }
+tracing-subscriber = { version = "0.3.15", features = ["std", "env-filter"] }
 
 [dev-dependencies]
